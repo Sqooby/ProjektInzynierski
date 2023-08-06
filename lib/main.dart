@@ -5,7 +5,7 @@ import 'package:pv_analizer/presentation/screens/home_screen.dart';
 import 'package:pv_analizer/presentation/screens/sing_up_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pv_analizer/logic/cubit/user_cubit.dart';
-import 'package:pv_analizer/logic/models/user.dart';
+
 import 'package:pv_analizer/logic/repositories/user_repo.dart';
 
 import 'presentation/screens/login_screen.dart';
@@ -30,8 +30,8 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         theme: ThemeData(
-          primaryColor: Color.fromRGBO(24, 69, 186, 1),
-          backgroundColor: Color.fromARGB(255, 26, 82, 224),
+          primaryColor: const Color.fromRGBO(24, 69, 186, 1),
+          backgroundColor: const Color.fromARGB(255, 26, 82, 224),
           fontFamily: "Lato",
         ),
         themeMode: ThemeMode.light,

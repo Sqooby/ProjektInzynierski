@@ -100,13 +100,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           alignment: Alignment.center,
                           child: TextButton(
                             onPressed: () {
-                              context.read<UserCubit>().fetchUser();
+                              // context.read<UserCubit>().fetchUser();
+                              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
 
-                              for (var x in state.users) {
-                                if (x.email == mailController.text) {
-                                  Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-                                }
-                              }
+                              // for (var x in state.users) {
+                              //   if (x.email == mailController.text) {
+                              //
+                              //   }
+                              // }
                             },
                             child: const Text(
                               "Zaloguj się",

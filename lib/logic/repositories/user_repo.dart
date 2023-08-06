@@ -1,8 +1,7 @@
 import 'dart:convert';
 
 import '../models/user.dart';
-import 'package:retrofit/retrofit.dart';
-import 'package:dio/dio.dart';
+
 import 'package:http/http.dart' as http;
 
 class UserRepo {
@@ -40,7 +39,7 @@ class UserRepo {
 
   Future<void> registerUser(User user) async {
     final uri = Uri.parse(url);
-    final Map<String, dynamic> _body = {
+    final Map<String, dynamic> body = {
       'email': user.email,
       'password': user.password,
       "role": user.role,
@@ -57,10 +56,10 @@ class UserRepo {
     };
     final response = await http.post(
       uri,
-      body: jsonEncode(_body),
+      body: jsonEncode(body),
       headers: {'Content-Type': 'application/json'},
     );
-    print(response.statusCode);
+
     if (response.statusCode == 201) {}
   }
 }

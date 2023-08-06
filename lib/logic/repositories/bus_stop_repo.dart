@@ -2,9 +2,6 @@ import 'dart:convert';
 
 import 'package:pv_analizer/logic/models/busStop.dart';
 
-import '../models/user.dart';
-import 'package:retrofit/retrofit.dart';
-import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
 class BusStopRepo {

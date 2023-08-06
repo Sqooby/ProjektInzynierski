@@ -17,7 +17,7 @@ class MapScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
-  static const LatLng destination = LatLng(50.042798698861404, 21.966032313114425);
+  static const LatLng destination = LatLng(50.036266, 21.992672);
   @override
   Widget build(BuildContext context) {
     return SafeArea(
