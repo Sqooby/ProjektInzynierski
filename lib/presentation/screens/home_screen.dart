@@ -13,20 +13,24 @@ import '../../logic/cubit/bus_stop_cubit.dart';
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key? key}) : super(key: key);
   static String routeName = '/home';
-  final TextEditingController mail = TextEditingController();
-  final TextEditingController password = TextEditingController();
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<AutocompletePrediction> placePredictions = [];
+  final TextEditingController currentLocationController = TextEditingController();
+  final TextEditingController destinationLocationController = TextEditingController();
+  List<AutocompletePrediction> currentLocationPredictions = [];
+  List<AutocompletePrediction> destinationLocationPredictions = [];
+
   @override
   void initState() {
     // TODO: implement initState
 
     super.initState();
+    // currentLocationController.text = currentLocation;
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final cubit = context.read<BusStopCubit>();
 
@@ -34,17 +38,14 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  void placeAutoComplete(String query) async {
+  void placeAutoComplete(String query, bool isCurrentLocation) async {
     Uri uri = Uri.https(
       'maps.googleapis.com',
       '/maps/api/place/autocomplete/json',
       {
         'input': query,
         'key': 'AIzaSyCPY2o9eEGZaaVVyt_X1O22Y_hrwkCzqrc',
-        // 'language': 'pl',
-        // 'location': '50.036266, 21.992672',
-        // 'radius': '500',
-        // 'types': 'street_address'
+        'language': 'pl',
       },
     );
     String? response = await NetworkUtility().fetchUrl(uri);
@@ -52,7 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
       PlaceAutocompleteResponse result = PlaceAutocompleteResponse.parseAutocompleteResult(response);
       if (result.predictions != null) {
         setState(() {
-          placePredictions = result.predictions!;
+          if (isCurrentLocation) {
+            currentLocationPredictions = result.predictions!;
+          } else {
+            destinationLocationPredictions = result.predictions!;
+          }
         });
       }
     }
@@ -75,18 +80,16 @@ class _HomeScreenState extends State<HomeScreen> {
             return Center(
               child: Column(
                 children: [
-                  // Text('LAT: ${context.read<BusStopCubit>().currentPosition?.latitude ?? ""}'),
-                  // Text('LNG: ${context.read<BusStopCubit>().currentPosition?.longitude ?? ""}'),
-                  // Text('ADDRESS: ${context.read<BusStopCubit>().currentAddress ?? ""}'),
                   Form(
                     child: Padding(
                       padding: const EdgeInsets.all(8),
                       child: TextFormField(
+                        controller: currentLocationController,
                         onChanged: (value) {
-                          placeAutoComplete(value);
+                          placeAutoComplete(value, true);
                         },
                         textInputAction: TextInputAction.search,
-                        decoration: const InputDecoration(hintText: 'Twoja lokalizacja'),
+                        decoration: const InputDecoration(hintText: 'Enter Location'),
                       ),
                     ),
                   ),
@@ -96,17 +99,59 @@ class _HomeScreenState extends State<HomeScreen> {
                   Flexible(
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: placePredictions.length,
+                      itemCount: currentLocationPredictions.length,
                       itemBuilder: ((context, index) {
-                        return LocationListTile(
-                          location: placePredictions[index].description!,
-                          press: () {},
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              currentLocationController.text = currentLocationPredictions[index].description!;
+
+                              currentLocationPredictions = [];
+                            });
+                          },
+                          child:
+                              LocationListTile(location: currentLocationPredictions[index].description!, press: () {}),
+                        );
+                      }),
+                    ),
+                  ),
+                  Form(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: TextFormField(
+                        controller: destinationLocationController,
+                        onChanged: (value) {
+                          placeAutoComplete(value, false);
+                        },
+                        textInputAction: TextInputAction.search,
+                        decoration: const InputDecoration(hintText: 'Gdzie jedziemy?'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: destinationLocationPredictions.length,
+                      itemBuilder: ((context, index) {
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              destinationLocationController.text = destinationLocationPredictions[index].description!;
+
+                              destinationLocationPredictions = [];
+                            });
+                          },
+                          child: LocationListTile(
+                              location: destinationLocationPredictions[index].description!, press: () {}),
                         );
                       }),
                     ),
                   ),
 
-                  // LoginWidget(text: 'Dokąd jedziemy?', controller: widget.mail),
+                  // LoginWidget(text: 'Dokąd jedziemy?', controlle: widget.mail),
                   // IconButton(
                   //   onPressed: () {
                   //     placeAutoComplete('Zimowit');
