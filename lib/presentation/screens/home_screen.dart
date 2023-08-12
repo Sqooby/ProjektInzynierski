@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pv_analizer/logic/models/autocomplete_prediction.dart';
 import 'package:pv_analizer/logic/models/place_auto_complate_response.dart';
-import 'package:pv_analizer/logic/repositories/netowrk_utillity.dart';
+import 'package:pv_analizer/logic/repositories/network_utility.dart';
+import 'package:pv_analizer/presentation/screens/map_screen.dart';
 
 import 'package:pv_analizer/presentation/widgets/home_drawer.dart';
 import 'package:pv_analizer/presentation/widgets/location_list_tile.dart';
-import 'package:pv_analizer/presentation/widgets/login_wigdet.dart';
 
 import '../../logic/cubit/bus_stop_cubit.dart';
 
@@ -19,50 +19,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final NetworkUtility nt = NetworkUtility();
   final TextEditingController currentLocationController = TextEditingController();
   final TextEditingController destinationLocationController = TextEditingController();
-  List<AutocompletePrediction> currentLocationPredictions = [];
-  List<AutocompletePrediction> destinationLocationPredictions = [];
-
-  @override
   void initState() {
     // TODO: implement initState
-
     super.initState();
-    // currentLocationController.text = currentLocation;
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final cubit = context.read<BusStopCubit>();
-
       cubit.fetchBusStop();
     });
   }
 
-  void placeAutoComplete(String query, bool isCurrentLocation) async {
-    Uri uri = Uri.https(
-      'maps.googleapis.com',
-      '/maps/api/place/autocomplete/json',
-      {
-        'input': query,
-        'key': 'AIzaSyCPY2o9eEGZaaVVyt_X1O22Y_hrwkCzqrc',
-        'language': 'pl',
-      },
-    );
-    String? response = await NetworkUtility().fetchUrl(uri);
-    if (response != null) {
-      PlaceAutocompleteResponse result = PlaceAutocompleteResponse.parseAutocompleteResult(response);
-      if (result.predictions != null) {
-        setState(() {
-          if (isCurrentLocation) {
-            currentLocationPredictions = result.predictions!;
-          } else {
-            destinationLocationPredictions = result.predictions!;
-          }
-        });
-      }
-    }
-  }
-
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: HomeDrawer(),
@@ -86,7 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: TextFormField(
                         controller: currentLocationController,
                         onChanged: (value) {
-                          placeAutoComplete(value, true);
+                          setState(() {
+                            nt.placeAutoComplete(value, true);
+                          });
+
+                          print(nt.destinationLocationPredictions[0]);
                         },
                         textInputAction: TextInputAction.search,
                         decoration: const InputDecoration(hintText: 'Enter Location'),
@@ -99,18 +72,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   Flexible(
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: currentLocationPredictions.length,
+                      itemCount: nt.currentLocationPredictions.length,
                       itemBuilder: ((context, index) {
                         return GestureDetector(
                           onTap: () {
                             setState(() {
-                              currentLocationController.text = currentLocationPredictions[index].description!;
+                              currentLocationController.text = nt.currentLocationPredictions[index].description!;
+                              print(nt.currentLocationPredictions[index].description!);
 
-                              currentLocationPredictions = [];
+                              nt.currentLocationPredictions = [];
                             });
                           },
-                          child:
-                              LocationListTile(location: currentLocationPredictions[index].description!, press: () {}),
+                          child: LocationListTile(
+                              location: nt.currentLocationPredictions[index].description!, press: () {}),
                         );
                       }),
                     ),
@@ -121,7 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: TextFormField(
                         controller: destinationLocationController,
                         onChanged: (value) {
-                          placeAutoComplete(value, false);
+                          setState(() {
+                            nt.placeAutoComplete(value, false);
+                          });
                         },
                         textInputAction: TextInputAction.search,
                         decoration: const InputDecoration(hintText: 'Gdzie jedziemy?'),
@@ -134,36 +110,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   Flexible(
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: destinationLocationPredictions.length,
+                      itemCount: nt.destinationLocationPredictions.length,
                       itemBuilder: ((context, index) {
                         return GestureDetector(
                           onTap: () {
                             setState(() {
-                              destinationLocationController.text = destinationLocationPredictions[index].description!;
+                              destinationLocationController.text =
+                                  nt.destinationLocationPredictions[index].description!;
 
-                              destinationLocationPredictions = [];
+                              nt.destinationLocationPredictions = [];
                             });
                           },
                           child: LocationListTile(
-                              location: destinationLocationPredictions[index].description!, press: () {}),
+                              location: nt.destinationLocationPredictions[index].description!, press: () {}),
                         );
                       }),
                     ),
                   ),
-
-                  // LoginWidget(text: 'Dokąd jedziemy?', controlle: widget.mail),
-                  // IconButton(
-                  //   onPressed: () {
-                  //     placeAutoComplete('Zimowit');
-                  //     // setState(() {
-                  //     //   context.read<BusStopCubit>().getCurrentPosition();
-                  //     // });
-
-                  //     // context.read<BusStopCubit>().fetchBusStop();
-                  //     // print(state.busStop[0].name);
-                  //   },
-                  //   icon: Icon(Icons.abc),
-                  // )
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacementNamed(MapScreen.routeName);
+                    },
+                    icon: const Icon(Icons.abc_sharp),
+                  )
                 ],
               ),
             );

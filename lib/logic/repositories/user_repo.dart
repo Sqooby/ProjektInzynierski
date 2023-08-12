@@ -24,9 +24,6 @@ class UserRepo {
           homeAddress: e['home_address'],
           password: e['password'],
           lastLogin: e['last_login'],
-          // isSuperuser: e['is_superuser'],
-          // isStaff: e['is_staff'],
-          // isActive: e['is_active'],
           dateJoined: e['date_joined'],
         );
       }).toList();

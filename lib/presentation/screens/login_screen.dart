@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: Color.fromRGBO(226, 226, 226, 1),
       body: BlocBuilder<UserCubit, UserState>(
         builder: ((context, state) {
+          print(state);
           if (state is UserErrorState) {
             print(state.error);
           } else if (state is UserLoadingState) {
