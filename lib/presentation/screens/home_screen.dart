@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pv_analizer/logic/models/autocomplete_prediction.dart';
-import 'package:pv_analizer/logic/models/place_auto_complate_response.dart';
-import 'package:pv_analizer/logic/repositories/network_utility.dart';
+
+import 'package:pv_analizer/logic/repositories/location_service.dart';
 import 'package:pv_analizer/presentation/screens/map_screen.dart';
 
 import 'package:pv_analizer/presentation/widgets/home_drawer.dart';
@@ -11,135 +15,148 @@ import 'package:pv_analizer/presentation/widgets/location_list_tile.dart';
 import '../../logic/cubit/bus_stop_cubit.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({Key? key}) : super(key: key);
   static String routeName = '/home';
+  const HomeScreen({key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  final NetworkUtility nt = NetworkUtility();
-  final TextEditingController currentLocationController = TextEditingController();
-  final TextEditingController destinationLocationController = TextEditingController();
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final cubit = context.read<BusStopCubit>();
-      cubit.fetchBusStop();
+class HomeScreenState extends State<HomeScreen> {
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+
+  static const CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 14.4746,
+  );
+
+  Set<Marker> _markers = Set<Marker>();
+  Set<Polygon> _polygons = Set<Polygon>();
+  Set<Polyline> _polylines = Set<Polyline>();
+  List<LatLng> polygonLatLngs = <LatLng>[];
+  int _polygonIdCounter = 1;
+  int _polylineIdCounter = 1;
+
+  static const CameraPosition _kLake = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(37.43296265331129, -122.08832357078792),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
+
+  TextEditingController _destinationController = TextEditingController();
+  TextEditingController _originController = TextEditingController();
+  @override
+  void _setMarker(LatLng point) {
+    setState(() {
+      _markers.add(Marker(
+        markerId: MarkerId('marker'),
+        position: point,
+      ));
     });
+  }
+
+  void _setPolyline(List<PointLatLng> points) {
+    final String polylineIdVal = 'polyline$_polylineIdCounter';
+    _polylineIdCounter++;
+    _polylines.add(
+      Polyline(
+        polylineId: PolylineId(polylineIdVal),
+        width: 2,
+        color: Colors.blue,
+        points: points
+            .map(
+              (point) => LatLng(point.latitude, point.longitude),
+            )
+            .toList(),
+      ),
+    );
+  }
+
+  void _setPolygon() {
+    final String polygonIdVal = 'polygon$_polygonIdCounter';
+    _polygonIdCounter++;
+    _polygons.add(Polygon(
+      polygonId: PolygonId(polygonIdVal),
+      points: polygonLatLngs,
+      strokeWidth: 2,
+      strokeColor: Colors.transparent,
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: HomeDrawer(),
       appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(""),
+        centerTitle: true,
+        title: const Text('Google Maps'),
       ),
-      body: BlocBuilder<BusStopCubit, BusStopState>(
-        builder: (context, state) {
-          if (state is BusStopErrorState) {
-            return Center(
-              child: Text(state.error),
-            );
-          } else if (state is BusStopLoadedState) {
-            return Center(
-              child: Column(
-                children: [
-                  Form(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: TextFormField(
-                        controller: currentLocationController,
-                        onChanged: (value) {
-                          setState(() {
-                            nt.placeAutoComplete(value, true);
-                          });
-
-                          print(nt.destinationLocationPredictions[0]);
-                        },
-                        textInputAction: TextInputAction.search,
-                        decoration: const InputDecoration(hintText: 'Enter Location'),
-                      ),
+      body: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _originController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(hintText: 'Origin'),
+                      onChanged: (value) {
+                        print(value);
+                      },
                     ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: nt.currentLocationPredictions.length,
-                      itemBuilder: ((context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              currentLocationController.text = nt.currentLocationPredictions[index].description!;
-                              print(nt.currentLocationPredictions[index].description!);
-
-                              nt.currentLocationPredictions = [];
-                            });
-                          },
-                          child: LocationListTile(
-                              location: nt.currentLocationPredictions[index].description!, press: () {}),
-                        );
-                      }),
+                    TextFormField(
+                      controller: _destinationController,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(hintText: 'Destination'),
+                      onChanged: (value) {
+                        print(value);
+                      },
                     ),
-                  ),
-                  Form(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: TextFormField(
-                        controller: destinationLocationController,
-                        onChanged: (value) {
-                          setState(() {
-                            nt.placeAutoComplete(value, false);
-                          });
-                        },
-                        textInputAction: TextInputAction.search,
-                        decoration: const InputDecoration(hintText: 'Gdzie jedziemy?'),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: nt.destinationLocationPredictions.length,
-                      itemBuilder: ((context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              destinationLocationController.text =
-                                  nt.destinationLocationPredictions[index].description!;
-
-                              nt.destinationLocationPredictions = [];
-                            });
-                          },
-                          child: LocationListTile(
-                              location: nt.destinationLocationPredictions[index].description!, press: () {}),
-                        );
-                      }),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacementNamed(MapScreen.routeName);
-                    },
-                    icon: const Icon(Icons.abc_sharp),
-                  )
-                ],
+                  ],
+                ),
               ),
-            );
-          }
-          return Container();
-        },
+              IconButton(
+                onPressed: () async {
+                  var directions =
+                      await LocationService().getDirections(_originController.text, _destinationController.text);
+
+                  _goToPlace(directions['start_location']['lat'], directions['start_location']['lng']);
+                  _setPolyline(directions['polyline_decoded']);
+                },
+                icon: const Icon(Icons.search),
+              )
+            ],
+          ),
+          Expanded(
+            child: GoogleMap(
+                mapType: MapType.normal,
+                initialCameraPosition: _kGooglePlex,
+                markers: _markers,
+                polygons: _polygons,
+                polylines: _polylines,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+                onTap: (point) {
+                  setState(() {
+                    polygonLatLngs.add(point);
+                    _setPolygon();
+                  });
+                }),
+          ),
+        ],
       ),
     );
+  }
+
+  Future<void> _goToPlace(double lat, double lng) async {
+    final GoogleMapController controller = await _controller.future;
+    await controller.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(target: LatLng(lat, lng), zoom: 14),
+      ),
+    );
+    _setMarker(LatLng(lat, lng));
   }
 }

@@ -40,19 +40,13 @@ class _HomeScreenState extends State<MapScreen> {
           title: const Text(""),
         ),
         drawer: HomeDrawer(),
-        body: Center(
-            child: TextButton(
-                onPressed: () {
-                  geocodingSearch("Rzeszów Zimowit 21");
-                },
-                child: Text('cos'))),
-        // body: GoogleMap(
-        //   initialCameraPosition: CameraPosition(
-        //     target: destination,
-        //     zoom: 12.5,
-        //     tilt: 68,
-        //   ),
-        // ),
+        body: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: destination,
+            zoom: 12.5,
+            tilt: 68,
+          ),
+        ),
       ),
     );
   }

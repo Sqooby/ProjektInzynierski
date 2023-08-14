@@ -14,8 +14,9 @@ class AutocompletePrediction {
 
   factory AutocompletePrediction.fromJson(Map<String, dynamic> map) {
     return AutocompletePrediction(
-        description: map['description'] as String?,
-        placeId: map['placeId'] as String?,
-        reference: map['reference'] as String);
+      description: map['description'] as String?,
+      placeId: map['placeId'] as String?,
+      reference: map['reference'] as String,
+    );
   }
 }
