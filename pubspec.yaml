@@ -42,9 +42,9 @@ dependencies:
   geolocator: ^9.0.2
   google_geocoding: ^0.2.0
   google_maps_flutter: ^2.2.8
+
   http: ^0.13.0
   json_annotation: ^4.8.1
-
   retrofit: ^4.0.1
   syncfusion_flutter_charts: ^20.3.59
 
