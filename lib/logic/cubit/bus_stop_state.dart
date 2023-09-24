@@ -7,6 +7,7 @@ class BusStopInitial extends BusStopState {}
 
 class BusStopLoadedState extends BusStopState {
   final List<BusStop> busStop;
+  void NearestBustStop;
   BusStopLoadedState(this.busStop);
 }
 
