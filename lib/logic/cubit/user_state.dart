@@ -7,6 +7,7 @@ class UserInitial extends UserState {}
 
 class UserLoadedState extends UserState {
   final List<User> users;
+
   UserLoadedState(this.users);
 }
 

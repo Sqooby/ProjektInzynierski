@@ -25,6 +25,9 @@ class UserRepo {
           password: e['password'],
           lastLogin: e['last_login'],
           dateJoined: e['date_joined'],
+          isActive: e['is_active'],
+          isStaff: e['is_staff'],
+          isSuperuser: e['is_superuser'],
         );
       }).toList();
 
@@ -52,6 +55,32 @@ class UserRepo {
       "date_joined": user.dateJoined,
     };
     final response = await http.post(
+      uri,
+      body: jsonEncode(body),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 201) {}
+  }
+
+  Future<void> putUser(User user) async {
+    final uri = Uri.parse(url);
+    final Map<String, dynamic> body = {
+      'email': user.email,
+      'password': user.password,
+      "role": user.role,
+      "first_name": user.firstName,
+      "last_name": user.lastName,
+      "phone_number": user.phoneNumber,
+      "username": user.username,
+      "home_address": user.homeAddress,
+      "last_login": user.lastLogin,
+      "is_superuser": user.isSuperuser,
+      "is_staff": user.isStaff,
+      "is_active": user.isActive,
+      "date_joined": user.dateJoined,
+    };
+    final response = await http.put(
       uri,
       body: jsonEncode(body),
       headers: {'Content-Type': 'application/json'},
