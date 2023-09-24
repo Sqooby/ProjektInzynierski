@@ -1,10 +1,10 @@
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert' as convert;
 
 class LocationService {
-  final String key = 'AIzaSyCPY2o9eEGZaaVVyt_X1O22Y_hrwkCzqrc';
+  final String? key = dotenv.env['API_KEY'];
   Future<String> getPlaceId(String input) async {
     final String url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=$input&key=$key';
     var response = await http.get(Uri.parse(url));
@@ -48,14 +48,15 @@ class LocationService {
 
   Future<List<String>> getAutocompleteLocation(String input) async {
     final String url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$key';
-    print(url);
+
     var response = await http.get(Uri.parse(url));
+    print(url);
     var json = convert.jsonDecode(response.body);
     List<String> places = [];
     for (var predictions in json['predictions']) {
       places.add(predictions['description']);
     }
-    print(places);
+
     return places;
   }
 }
