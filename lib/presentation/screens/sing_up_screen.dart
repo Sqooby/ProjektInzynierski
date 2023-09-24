@@ -119,7 +119,6 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                               setState(() {
                                                 checkedValue = value!;
                                                 role = 'driver';
-                                                print(role);
                                               });
                                             }),
                                         const Text(
@@ -146,6 +145,7 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                         if (_formKey.currentState!.validate()) {
                                           context.read<UserCubit>().registerUser(
                                                 User(
+                                                  idUser: 99,
                                                   email: widget.mail.text,
                                                   password: widget.password.text,
                                                   firstName: widget.firstName.text,

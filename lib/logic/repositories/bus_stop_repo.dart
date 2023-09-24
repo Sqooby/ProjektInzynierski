@@ -32,4 +32,9 @@ class BusStopRepo {
       throw '${response.statusCode}';
     }
   }
+
+  // Future<List<BusStop>> BusStopByIdCourse(int IdCourse) async {
+  //   final busStops = await getBusStop();
+  //   return busStops.where((busStop) => busStop['id_course'])
+  // }
 }

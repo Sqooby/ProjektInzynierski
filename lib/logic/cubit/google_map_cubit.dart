@@ -19,6 +19,7 @@ class GoogleMapCubit extends Cubit<GoogleMapState> {
   Future<Map<String, dynamic>> fechtingDirection(String origin, String destination) async {
     emit(GoogleMapLoadingState());
     var directions = await _repo.getDirections(origin, destination);
+    print(directions);
 
     emit(GoogleMapDirectionsFetched(
       directions,

@@ -7,7 +7,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pv_analizer/logic/cubit/google_map_cubit.dart';
 
 class MapWidget extends StatefulWidget {
-  const MapWidget({Key? key}) : super(key: key);
+  const MapWidget({Key? key, required this.origin, required this.destination}) : super(key: key);
+  final String origin;
+  final String destination;
 
   @override
   State<MapWidget> createState() => _MapWidgetState();
@@ -23,6 +25,10 @@ class _MapWidgetState extends State<MapWidget> {
   final Set<Polygon> polygons = Set<Polygon>();
   final Set<Polyline> polylines = Set<Polyline>();
   final List<LatLng> polygonLatLngs = <LatLng>[];
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +61,7 @@ class _MapWidgetState extends State<MapWidget> {
     void setMarker(LatLng point) {
       setState(() {
         markers.add(Marker(
-          markerId: MarkerId('marker'),
+          markerId: const MarkerId('marker'),
           position: point,
         ));
       });
@@ -77,103 +83,27 @@ class _MapWidgetState extends State<MapWidget> {
       zoom: 14.4746,
     );
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('Google Maps'),
-      ),
-      body: BlocBuilder<GoogleMapCubit, GoogleMapState>(
-        builder: (context, state) {
-          if (state is GoogleMapInitial) {
-            return Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: originController,
-                            textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(hintText: 'Origin'),
-                            onChanged: (value) {},
-                          ),
-                          TextFormField(
-                            controller: destinationController,
-                            textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(hintText: 'Destination'),
-                            onChanged: (value) {
-                              print(value);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: () async {
-                    var directions = await context.read<GoogleMapCubit>().fechtingDirection('Paris', 'Milan');
+      body: Column(
+        children: [
+          Expanded(
+              child: GoogleMap(
+            initialCameraPosition: kGooglePlex,
+            mapType: MapType.normal,
+            markers: markers,
+            polygons: polygons,
+            polylines: polylines,
+          )),
+          IconButton(
+            onPressed: () async {
+              var directions =
+                  await context.read<GoogleMapCubit>().fechtingDirection(widget.origin, widget.destination);
 
-                    goToPlace(directions['start_location']['lat'], directions['start_location']['lng']);
-                    setPolyline(directions['polyline_decoded']);
-                  },
-                  icon: const Icon(Icons.search),
-                )
-              ],
-            );
-          }
-          if (state is GoogleMapDirectionsFetched) {
-            return Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: originController,
-                            textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(hintText: 'Origin'),
-                            onChanged: (value) {
-                              print(value);
-                            },
-                          ),
-                          TextFormField(
-                            controller: destinationController,
-                            textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(hintText: 'Destination'),
-                            onChanged: (value) {
-                              print(value);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: GoogleMap(
-                      mapType: MapType.normal,
-                      initialCameraPosition: kGooglePlex,
-                      markers: markers,
-                      polygons: polygons,
-                      polylines: polylines,
-                      onMapCreated: (GoogleMapController controller) {
-                        _controller.complete(controller);
-                      },
-                      onTap: (point) {
-                        setState(() {
-                          polygonLatLngs.add(point);
-                          setMarker(LatLng(point.latitude, point.longitude));
-                          print(point);
-                        });
-                      }),
-                ),
-              ],
-            );
-          }
-          return Container();
-        },
+              goToPlace(directions['start_location']['lat'], directions['start_location']['lng']);
+              setPolyline(directions['polyline_decoded']);
+            },
+            icon: const Icon(Icons.search),
+          ),
+        ],
       ),
     );
   }

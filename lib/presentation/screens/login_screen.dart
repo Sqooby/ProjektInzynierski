@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+
 import 'package:pv_analizer/logic/cubit/user_cubit.dart';
-import 'package:pv_analizer/logic/models/user.dart';
-import 'package:pv_analizer/logic/repositories/user_repo.dart';
+
 import 'package:pv_analizer/presentation/screens/home_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../widgets/login_wigdet.dart';
 import 'sing_up_screen.dart';
-import 'map_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static String routeName = '/';
+
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -34,12 +35,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromRGBO(226, 226, 226, 1),
+      backgroundColor: const Color.fromRGBO(226, 226, 226, 1),
       body: BlocBuilder<UserCubit, UserState>(
         builder: ((context, state) {
-          print(state);
           if (state is UserErrorState) {
-            print(state.error);
           } else if (state is UserLoadingState) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -100,14 +99,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Theme.of(context).primaryColor,
                           alignment: Alignment.center,
                           child: TextButton(
-                            onPressed: () {
-                              // context.read<UserCubit>().fetchUser();
-                              Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
-
-                              // for (var x in state.users) {
-                              //   if (x.email == mailController.text) {
-                              //
-                              //   }
+                            onPressed: () async {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => HomeScreen()),
+                              );
+                              // final busStopByCourse = await DataManager().busStopByIdCourseStage(75);
+                              // for (var x in busStopByCourse) {
+                              //   print(x.first.name);
                               // }
                             },
                             child: const Text(
@@ -142,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         Navigator.of(context).pushNamed(SingUpScreen.routeName);
                       },
-                      style: ButtonStyle(),
+                      style: const ButtonStyle(),
                       child: Text(
                         "Załóż konto",
                         style: TextStyle(
@@ -157,8 +156,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 15,
                 ),
                 Container(
-                  margin: EdgeInsets.only(top: 50),
-                  child: Column(
+                  margin: const EdgeInsets.only(top: 50),
+                  child: const Column(
                     children: [],
                   ),
                 ),

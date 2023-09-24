@@ -8,9 +8,9 @@ import '../screens/login_screen.dart';
 class HomeDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    bool _isSelected = true;
+    bool isSelected = true;
 
-    Widget _ItemDrawer(String name, IconData icon, dynamic _onTap) {
+    Widget ItemDrawer(String name, IconData icon, dynamic onTap) {
       return Ink(
         child: ListTile(
           title: Text(
@@ -21,7 +21,7 @@ class HomeDrawer extends StatelessWidget {
             icon,
             color: Colors.white,
           ),
-          onTap: _onTap,
+          onTap: onTap,
         ),
       );
     }
@@ -47,30 +47,30 @@ class HomeDrawer extends StatelessWidget {
                   ),
                   Container(
                     padding: const EdgeInsets.only(left: 20),
+                    height: 30,
                     child: Image.asset(
                       'assets/Icons/thunderbolt.png',
                       color: Colors.white,
                     ),
-                    height: 30,
                   )
                 ],
               ),
             ),
-            _ItemDrawer(
+            ItemDrawer(
               'Home',
               Icons.home,
               () {
                 Navigator.of(context).pushReplacementNamed(MapScreen.routeName);
               },
             ),
-            _ItemDrawer(
+            ItemDrawer(
               "Profile",
               Icons.person,
               () {
                 Navigator.of(context).pushReplacementNamed(ProfileScreen.routeName);
               },
             ),
-            _ItemDrawer(
+            ItemDrawer(
               "LogOut",
               Icons.logout,
               () {

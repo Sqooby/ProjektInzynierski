@@ -11,10 +11,6 @@ class GoogleMapDirectionsFetched extends GoogleMapState {
   final Map<String, dynamic> direction;
   final Completer<GoogleMapController> controller = Completer<GoogleMapController>();
 
-  final Set<Marker> markers = Set<Marker>();
-  final Set<Polygon> polygons = Set<Polygon>();
-  final Set<Polyline> polylines = Set<Polyline>();
-  final List<LatLng> polygonLatLngs = <LatLng>[];
   GoogleMapDirectionsFetched(this.direction);
 }
 

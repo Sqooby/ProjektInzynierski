@@ -11,6 +11,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
+        centerTitle: true,
         title: const Text("Profile"),
         backgroundColor: Theme.of(context).primaryColor,
       ),
@@ -25,6 +26,7 @@ class ProfileScreen extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
           child: Card(
             shadowColor: const Color.fromARGB(255, 187, 187, 187),
+            
             elevation: 10,
             child: Column(children: [
               Container(

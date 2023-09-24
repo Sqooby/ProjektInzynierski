@@ -38,12 +38,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                 controller: widget.controller,
                 autofocus: false,
                 focusNode: myFocusNode,
-                style: TextStyle(letterSpacing: 3, fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(letterSpacing: 3, fontSize: 18, fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                   labelText: widget.text,
                   labelStyle:
-                      TextStyle(color: Color.fromRGBO(24, 69, 186, 1), fontSize: myFocusNode.hasFocus ? 18 : 18),
-                  enabledBorder: UnderlineInputBorder(),
+                      TextStyle(color: const Color.fromRGBO(24, 69, 186, 1), fontSize: myFocusNode.hasFocus ? 18 : 18),
+                  enabledBorder: const UnderlineInputBorder(),
                 ),
               ),
             ),
