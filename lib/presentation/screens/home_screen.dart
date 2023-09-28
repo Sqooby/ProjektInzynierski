@@ -6,6 +6,7 @@ import 'package:pv_analizer/logic/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/logic/cubit/google_map_cubit.dart';
 
 import 'package:pv_analizer/logic/models/busStop.dart';
+import 'package:pv_analizer/presentation/widgets/list_of_predictions_location.dart';
 
 import '/../logic/repositories/bus_stop_time_repo.dart';
 
@@ -34,6 +35,13 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final cubit = context.read<BusStopCubit>();
       cubit.fetchBusStop();
+    });
+  }
+
+  void updateOriginTextField(String text) {
+    setState(() {
+      widget.originController.text = text;
+      widget.predictionsOriginList = []; // Clear the predictions list
     });
   }
 
@@ -107,31 +115,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 30,
               ),
               widget.predictionsOriginList.isNotEmpty
-                  ? Expanded(
-                      child: ListView.builder(
-                        itemCount: widget.predictionsOriginList.length,
-                        itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () async {
-                              widget.originController.text = widget.predictionsOriginList[index];
-
-                              final place = await ls.getPlace(widget.originController.text);
-                              final originLat = place['geometry']['location']['lat'];
-                              final originLng = place['geometry']['location']['lng'];
-
-                              setState(() {
-                                widget.predictionsOriginList = [];
-                              });
-                            },
-                            child: ListTile(
-                              title: Text(
-                                widget.predictionsOriginList[index],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                  ? PredictionsListTile(
+                      getPlace: ls.getPlace(widget.originController.text),
+                      controllerText: widget.originController.text,
+                      predictionsOriginList: widget.predictionsOriginList,
                     )
+
+                  // ? Expanded(
+                  //     child: ListView.builder(
+                  //       itemCount: widget.predictionsOriginList.length,
+                  //       itemBuilder: (context, index) {
+                  //         return GestureDetector(
+                  //           onTap: () async {
+                  //             widget.originController.text = widget.predictionsOriginList[index];
+
+                  //             final place = await ls.getPlace(widget.originController.text);
+                  //             final originLat = place['geometry']['location']['lat'];
+                  //             final originLng = place['geometry']['location']['lng'];
+
+                  //             setState(() {
+                  //               widget.predictionsOriginList = [];
+                  //             });
+                  //           },
+                  //           child: ListTile(
+                  //             title: Text(
+                  //               widget.predictionsOriginList[index],
+                  //             ),
+                  //           ),
+                  //         );
+                  //       },
+                  //     ),
+                  //   )
                   : const SizedBox(),
               widget.predictionsDestinationList.isNotEmpty
                   ? Expanded(
