@@ -12,6 +12,7 @@ class UserRepo {
 
     if (response.statusCode == 200) {
       final json = jsonDecode(response.body) as List;
+
       final result = json.map((e) {
         return User(
           idUser: e['id_user'],

@@ -15,6 +15,7 @@ class DataManager {
       final busStopName = busStop.where((busStop) => busStop.idBusStop == idBusStop);
       return busStopName;
     }).toList();
+    print(busStopByCourse[0].first);
     return busStopByCourse;
   }
 }

@@ -10,8 +10,6 @@ part 'bus_stop_state.dart';
 
 class BusStopCubit extends Cubit<BusStopState> {
   final BusStopRepo _repo;
-  String? currentAddress;
-  Position? currentPosition;
 
   BusStopCubit(this._repo) : super(BusStopInitial());
 
@@ -25,6 +23,4 @@ class BusStopCubit extends Cubit<BusStopState> {
       emit(BusStopErrorState(e.toString()));
     }
   }
-
-  Future<void> getNearestBusStop(double lat, double lng, Iterable<BusStop> response) async {}
 }
