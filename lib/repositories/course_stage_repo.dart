@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:pv_analizer/logic/models/course_stage_list.dart';
+import 'package:pv_analizer/models/course_stage_list.dart';
 
 import 'package:http/http.dart' as http;
 

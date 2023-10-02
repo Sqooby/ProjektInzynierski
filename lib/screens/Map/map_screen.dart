@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:pv_analizer/logic/cubit/google_map_cubit.dart';
-import 'package:pv_analizer/logic/repositories/location_service_repo.dart';
+import 'package:pv_analizer/screens/Map/cubit/google_map_cubit.dart';
+import 'package:pv_analizer/repositories/location_service_repo.dart';
 
-import '../widgets/home_drawer.dart';
-import '../widgets/map_widget.dart';
+import '../../widgets/home_drawer.dart';
+import '../../widgets/map_widget.dart';
 
 class MapScreen extends StatefulWidget {
   static String routeName = '/map';

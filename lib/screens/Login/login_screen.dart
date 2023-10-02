@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-import 'package:pv_analizer/logic/cubit/user_cubit.dart';
+import 'package:pv_analizer/screens/Login/cubit/user_cubit.dart';
 
-import 'package:pv_analizer/presentation/screens/home_screen.dart';
+import 'package:pv_analizer/screens/Home/home_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../widgets/login_wigdet.dart';
-import 'sing_up_screen.dart';
+import '../../widgets/login_wigdet.dart';
+import '../SingUp/sing_up_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static String routeName = '/';

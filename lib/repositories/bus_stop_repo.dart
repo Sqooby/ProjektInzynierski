@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:pv_analizer/logic/models/busStop.dart';
+import 'package:pv_analizer/models/busStop.dart';
 
 import 'package:http/http.dart' as http;
 

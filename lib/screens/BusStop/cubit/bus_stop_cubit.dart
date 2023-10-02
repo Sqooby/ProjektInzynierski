@@ -1,12 +1,10 @@
 import 'package:bloc/bloc.dart';
-import 'package:geocoding/geocoding.dart';
+
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:meta/meta.dart';
-import 'package:pv_analizer/logic/models/busStop.dart';
-
-import '../repositories/bus_stop_repo.dart';
+import 'package:pv_analizer/models/busStop.dart';
+import 'package:pv_analizer/repositories/bus_stop_repo.dart';
 
 part 'bus_stop_state.dart';
 

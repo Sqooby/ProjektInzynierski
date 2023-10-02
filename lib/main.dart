@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:pv_analizer/logic/cubit/bus_stop_cubit.dart';
-import 'package:pv_analizer/logic/cubit/google_map_cubit.dart';
-import 'package:pv_analizer/logic/repositories/bus_stop_repo.dart';
 
-import 'package:pv_analizer/logic/repositories/location_service_repo.dart';
-import 'package:pv_analizer/presentation/screens/home_screen.dart';
-import 'package:pv_analizer/presentation/screens/sing_up_screen.dart';
+import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
+import 'package:pv_analizer/screens/Map/cubit/google_map_cubit.dart';
+import 'package:pv_analizer/repositories/bus_stop_repo.dart';
+
+import 'package:pv_analizer/repositories/location_service_repo.dart';
+import 'package:pv_analizer/screens/Home/home_screen.dart';
+import 'package:pv_analizer/screens/SingUp/sing_up_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pv_analizer/logic/cubit/user_cubit.dart';
+import 'package:pv_analizer/screens/Login/cubit/user_cubit.dart';
 
-import 'package:pv_analizer/logic/repositories/user_repo.dart';
+import 'package:pv_analizer/repositories/user_repo.dart';
 
-import 'presentation/screens/login_screen.dart';
+import 'screens/Login/login_screen.dart';
 
-import 'presentation/screens/profile_screen.dart';
+import 'screens/profile/profile_screen.dart';
 
 void main() async {
   await dotenv.load(fileName: 'lib/constant.env');

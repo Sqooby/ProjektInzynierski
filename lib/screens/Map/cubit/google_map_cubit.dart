@@ -6,8 +6,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:pv_analizer/logic/repositories/location_service_repo.dart';
-import 'package:pv_analizer/logic/repositories/user_repo.dart';
+import 'package:pv_analizer/repositories/location_service_repo.dart';
 
 part 'google_map_state.dart';
 

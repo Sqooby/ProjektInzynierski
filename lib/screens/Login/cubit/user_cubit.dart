@@ -1,11 +1,9 @@
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
-import 'package:meta/meta.dart';
-import 'package:pv_analizer/logic/models/course_stage_list.dart';
-import 'package:pv_analizer/logic/models/user.dart';
-import 'package:equatable/equatable.dart';
-import 'package:pv_analizer/logic/repositories/course_stage_repo.dart';
-import 'package:pv_analizer/logic/repositories/user_repo.dart';
+import 'package:flutter/material.dart';
+
+import 'package:pv_analizer/models/user.dart';
+
+import 'package:pv_analizer/repositories/user_repo.dart';
 
 part 'user_state.dart';
 

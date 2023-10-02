@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:pv_analizer/presentation/screens/profile_screen.dart';
+import 'package:pv_analizer/screens/profile/profile_screen.dart';
 
-import '../screens/map_screen.dart';
+import '../screens/Map/map_screen.dart';
 
-import '../screens/login_screen.dart';
+import '../screens/Login/login_screen.dart';
 
 class HomeDrawer extends StatelessWidget {
   @override

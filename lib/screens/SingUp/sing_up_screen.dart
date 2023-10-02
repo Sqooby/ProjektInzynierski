@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../logic/models/user.dart';
+import '../../models/user.dart';
 
-import '../../logic/cubit/user_cubit.dart';
+import '../Login/cubit/user_cubit.dart';
 
-import '../widgets/login_wigdet.dart';
+import '../../widgets/login_wigdet.dart';
 
 class SingUpScreen extends StatefulWidget {
   static String routeName = '/sing_up';

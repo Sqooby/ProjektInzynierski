@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/home_drawer.dart';
+import '../../widgets/home_drawer.dart';
 
 class ProfileScreen extends StatelessWidget {
   static String routeName = '/profile';
@@ -26,7 +26,6 @@ class ProfileScreen extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
           child: Card(
             shadowColor: const Color.fromARGB(255, 187, 187, 187),
-            
             elevation: 10,
             child: Column(children: [
               Container(

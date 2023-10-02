@@ -1,6 +1,6 @@
-import 'package:pv_analizer/logic/models/busStop.dart';
-import 'package:pv_analizer/logic/repositories/bus_stop_repo.dart';
-import 'package:pv_analizer/logic/repositories/course_stage_repo.dart';
+import 'package:pv_analizer/models/busStop.dart';
+import 'package:pv_analizer/repositories/bus_stop_repo.dart';
+import 'package:pv_analizer/repositories/course_stage_repo.dart';
 
 class DataManager {
   final _busStopRepo = BusStopRepo();
