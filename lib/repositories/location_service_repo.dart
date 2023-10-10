@@ -52,13 +52,16 @@ class LocationService {
     final String url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$key';
 
     var response = await http.get(Uri.parse(url));
-    print(url);
-    var json = convert.jsonDecode(response.body);
-    List<String> places = [];
-    for (var predictions in json['predictions']) {
-      places.add(predictions['description']);
-    }
 
-    return places;
+    try {
+      var json = convert.jsonDecode(response.body);
+      List<String> places = [];
+      for (var predictions in json['predictions']) {
+        places.add(predictions['description']);
+      }
+      return places;
+    } catch (e) {
+      throw 'e';
+    }
   }
 }
