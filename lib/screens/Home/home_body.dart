@@ -4,6 +4,7 @@ import 'package:pv_analizer/DataManager/data_manager.dart';
 import 'package:pv_analizer/models/busStop.dart';
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:pv_analizer/screens/BusStop/bus_stop_screen.dart';
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 
 // ignore: must_be_immutable
@@ -80,6 +81,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                             setState(() {
                               // widget.busStopList = state.busStop;
                             });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => BusStopScreen()),
+                            );
                           },
                           icon: const Icon(
                             Icons.search,
@@ -164,6 +169,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     double possibleNearestDistanceToOrigin;
     double nearestDistanceToDestination = 1000;
     double possibleNearestDistanceToDestination;
+    List<int> idCourseStage = [74, 75, 76, 77, 78];
 
     double busStopLngOrg;
     double busStopLatOrg;
@@ -171,6 +177,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     double busStopLatDst;
     String? nearestBusStopOrg;
     String? nearestBusStopDst;
+    List<Iterable<BusStop>> courseStageBusStops = await widget.dm.busStopByIdCourseStage(74);
 
     widget.busStopList.forEach((busStop) {
       busStopLatOrg = double.parse(busStop.gpsN);
@@ -191,16 +198,5 @@ class _HomeWidgetState extends State<HomeWidget> {
         nearestBusStopDst = busStop.name;
       }
     });
-  }
-
-  Future getingCourse(String origin, String destination) async {
-    final List<int> courseStageNum = [74, 75, 76, 77, 78];
-
-    final courseStage = await widget.dm.busStopByIdCourseStage(74);
-    for (var x in courseStageNum) {}
-
-    for (var y in courseStage) {}
-
-    return courseStage.first.first;
   }
 }

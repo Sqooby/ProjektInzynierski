@@ -31,7 +31,6 @@ class LocationService {
   Future<Map<String, dynamic>> getDirections(String origin, String desination) async {
     final String url =
         'https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$desination&key=$key';
-    print(url);
 
     var response = await http.get(Uri.parse(url));
     var json = convert.jsonDecode(response.body);
