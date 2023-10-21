@@ -5,7 +5,7 @@ import 'package:pv_analizer/screens/Map/cubit/google_map_cubit.dart';
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 
 import '../../widgets/home_drawer.dart';
-import '../../widgets/map_widget.dart';
+import 'map_body.dart';
 
 class MapScreen extends StatefulWidget {
   static String routeName = '/map';
@@ -27,23 +27,23 @@ class _HomeScreenState extends State<MapScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
-          title: const Text(""),
-        ),
-        drawer: HomeDrawer(),
-        body: BlocProvider(
-          create: (context) => GoogleMapCubit(LocationService()),
-          child: MapWidget(
-            origin: widget.origin,
-            destination: widget.destination,
-          ),
-        ),
-      ),
-    );
+    return MapBody();
+    // return SafeArea(
+    //   child: Scaffold(
+    //     appBar: AppBar(
+    //       backgroundColor: Theme.of(context).primaryColor,
+    //       title: const Text(""),
+    //     ),
+    //     drawer: HomeDrawer(),
+    //     body: BlocProvider(
+    //       create: (context) => GoogleMapCubit(LocationService()),
+    //       child: MapWidget(
+    //         origin: widget.origin,
+    //         destination: widget.destination,
+    //       ),
+    //     ),
+    //   ),
+    // );
   }
 }

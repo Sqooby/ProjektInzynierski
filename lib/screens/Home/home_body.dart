@@ -81,6 +81,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                             setState(() {
                               // widget.busStopList = state.busStop;
                             });
+                            ls.getDirections(widget.originController.text, widget.destinationController.text);
                             Navigator.push(
                               context,
                               MaterialPageRoute(builder: (context) => BusStopScreen()),

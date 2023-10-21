@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:pv_analizer/screens/Map/map_body.dart';
+import 'package:pv_analizer/screens/Map/map_screen.dart';
 
 class BusStopBody extends StatelessWidget {
   const BusStopBody({Key? key}) : super(key: key);
@@ -36,17 +38,23 @@ class BusStopBody extends StatelessWidget {
           padding: EdgeInsets.all(10),
           itemCount: 12,
           itemBuilder: ((context, index) {
-            return Card(child: ListTileCourse());
+            return Card(child: ListTileCourse(context));
           }),
         ),
       ),
     );
   }
 
-  Widget ListTileCourse() {
-    return const ListTile(
+  Widget ListTileCourse(BuildContext context) {
+    return ListTile(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MapBody()),
+        );
+      },
       style: ListTileStyle.drawer,
-      title: Row(children: [
+      title: const Row(children: [
         Icon(Icons.bus_alert_rounded),
         Card(
           margin: EdgeInsets.all(5),
