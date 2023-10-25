@@ -64,14 +64,14 @@ class BusStopBody extends StatelessWidget {
           ),
         )
       ]),
-      leading: Padding(
+      leading: const Padding(
         padding: EdgeInsets.only(right: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [Text('odjazd za:'), Text("czas")],
         ),
       ),
-      subtitle: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+      subtitle: const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Row(
           children: [
             Icon(Icons.nordic_walking),

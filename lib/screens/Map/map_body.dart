@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pv_analizer/screens/Map/cubit/google_map_cubit.dart';
@@ -18,17 +19,37 @@ class MapBody extends StatefulWidget {
 
 class _MapWidgetState extends State<MapBody> {
   bool isLeftAligned = true;
+  final String? key = dotenv.env['API_KEY'];
   final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   final TextEditingController originController = TextEditingController();
   final TextEditingController destinationController = TextEditingController();
   var _polylineIdCounter = 0;
   var _polygonIdCounter = 0;
-  final Set<Marker> markers = Set<Marker>();
-  final Set<Polygon> polygons = Set<Polygon>();
-  final Set<Polyline> polylines = Set<Polyline>();
+
   final List<LatLng> polygonLatLngs = <LatLng>[];
+  List<LatLng> polylineCoordinates = [];
+  static const LatLng sourceLocation = LatLng(50.018690000, 22.02623000);
+  static const LatLng destination = LatLng(50.031660000, 22.03350000);
+  void getPolyPoints() async {
+    PolylinePoints polylinePoints = PolylinePoints();
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      key!, // Your Google Map Key
+      PointLatLng(sourceLocation.latitude, sourceLocation.longitude),
+      PointLatLng(destination.latitude, destination.longitude),
+    );
+    if (result.points.isNotEmpty) {
+      result.points.forEach(
+        (PointLatLng point) => polylineCoordinates.add(
+          LatLng(point.latitude, point.longitude),
+        ),
+      );
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
+    getPolyPoints();
     super.initState();
   }
 
@@ -43,46 +64,9 @@ class _MapWidgetState extends State<MapBody> {
       );
     }
 
-    void setPolyline(List<PointLatLng> points) {
-      final String polylineIdVal = 'polyline$_polylineIdCounter';
-      _polylineIdCounter++;
-      polylines.add(
-        Polyline(
-          polylineId: PolylineId(polylineIdVal),
-          width: 2,
-          color: Colors.blue,
-          points: points
-              .map(
-                (point) => LatLng(point.latitude, point.longitude),
-              )
-              .toList(),
-        ),
-      );
-    }
-
-    void setMarker(LatLng point) {
-      setState(() {
-        markers.add(Marker(
-          markerId: const MarkerId('marker'),
-          position: point,
-        ));
-      });
-    }
-
-    void setPolygon() {
-      final String polygonIdVal = 'polygon$_polygonIdCounter';
-      _polygonIdCounter++;
-      polygons.add(Polygon(
-        polygonId: PolygonId(polygonIdVal),
-        points: polygonLatLngs,
-        strokeWidth: 2,
-        strokeColor: Colors.transparent,
-      ));
-    }
-
     const CameraPosition kGooglePlex = CameraPosition(
-      target: LatLng(48.864716, 2.349014),
-      zoom: 12.4746,
+      target: LatLng(50.041187, 21.999121),
+      zoom: 12.5,
     );
     return Scaffold(
       appBar: AppBar(),
@@ -95,17 +79,29 @@ class _MapWidgetState extends State<MapBody> {
                 MediaQuery.sizeOf(context).height * 0.16,
             child: Stack(
               children: [
-                // SizedBox(
-                //   height: MediaQuery.sizeOf(context).height -
-                //       AppBar().preferredSize.height -
-                //       MediaQuery.sizeOf(context).height * 0.16,
-                // child:
                 GoogleMap(
                   initialCameraPosition: kGooglePlex,
                   mapType: MapType.terrain,
-                  markers: markers,
-                  polygons: polygons,
-                  polylines: polylines,
+                  markers: {
+                    const Marker(
+                      markerId: MarkerId("source"),
+                      position: sourceLocation,
+                    ),
+                    const Marker(
+                      markerId: MarkerId("destination"),
+                      position: destination,
+                    ),
+                  },
+                  onMapCreated: (mapController) {
+                    _controller.complete(mapController);
+                  },
+                  polylines: {
+                    Polyline(
+                        polylineId: const PolylineId('route'),
+                        points: polylineCoordinates,
+                        color: const Color(0xFF7B61FF),
+                        width: 6),
+                  },
                 ),
                 // ),
                 GestureDetector(
@@ -171,55 +167,7 @@ class _MapWidgetState extends State<MapBody> {
                             ),
                           ],
                         ),
-                      )
-                      // : Container(
-                      //     width: MediaQuery.sizeOf(context).width * .5,
-                      //     color: Colors.white,
-                      //     child: const Column(
-                      //       children: [
-                      //         Card(
-                      //           child: Padding(
-                      //             padding: EdgeInsets.all(8.0),
-                      //             child: Text('godz'),
-                      //           ),
-                      //         ),
-                      //         Divider(
-                      //           thickness: 1,
-                      //         ),
-                      //         Padding(
-                      //           padding: EdgeInsets.all(8.0),
-                      //           child: Icon(Icons.nordic_walking),
-                      //         ),
-                      //         Divider(thickness: 1),
-                      //         Card(
-                      //           margin: EdgeInsets.only(bottom: 10),
-                      //           child: Padding(
-                      //             padding: EdgeInsets.all(8.0),
-                      //             child: Text('godz'),
-                      //           ),
-                      //         ),
-                      //         Padding(
-                      //           padding: EdgeInsets.all(8.0),
-                      //           child: Row(
-                      //             mainAxisAlignment: MainAxisAlignment.center,
-                      //             children: [
-                      //               Icon(Icons.bus_alert),
-                      //               Card(
-                      //                 child: Text('nr'),
-                      //               ),
-                      //             ],
-                      //           ),
-                      //         ),
-                      //         Card(
-                      //           child: Padding(
-                      //             padding: EdgeInsets.all(8.0),
-                      //             child: Text('kon'),
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      ),
+                      )),
                 ),
               ],
             ),
@@ -229,53 +177,3 @@ class _MapWidgetState extends State<MapBody> {
     );
   }
 }
-//  Align(
-//                           alignment: Alignment.centerRight,
-//                           child: Container(
-//                             width: MediaQuery.sizeOf(context).width * 0.25,
-//                             color: Colors.white,
-//                             child: const Column(
-//                               children: [
-//                                 Card(
-//                                   child: Padding(
-//                                     padding: EdgeInsets.all(8.0),
-//                                     child: Text('godz'),
-//                                   ),
-//                                 ),
-//                                 Divider(
-//                                   thickness: 1,
-//                                 ),
-//                                 Padding(
-//                                   padding: EdgeInsets.all(8.0),
-//                                   child: Icon(Icons.nordic_walking),
-//                                 ),
-//                                 Divider(thickness: 1),
-//                                 Card(
-//                                   margin: EdgeInsets.only(bottom: 10),
-//                                   child: Padding(
-//                                     padding: EdgeInsets.all(8.0),
-//                                     child: Text('godz'),
-//                                   ),
-//                                 ),
-//                                 Padding(
-//                                   padding: EdgeInsets.all(8.0),
-//                                   child: Row(
-//                                     mainAxisAlignment: MainAxisAlignment.center,
-//                                     children: [
-//                                       Icon(Icons.bus_alert),
-//                                       Card(
-//                                         child: Text('nr'),
-//                                       ),
-//                                     ],
-//                                   ),
-//                                 ),
-//                                 Card(
-//                                   child: Padding(
-//                                     padding: EdgeInsets.all(8.0),
-//                                     child: Text('kon'),
-//                                   ),
-//                                 ),
-//                               ],
-//                             ),
-//                           ),
-//                         )

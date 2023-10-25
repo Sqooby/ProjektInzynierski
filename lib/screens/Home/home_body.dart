@@ -24,6 +24,7 @@ class HomeWidget extends StatefulWidget {
   List<String> predictionsOriginList = [];
   List<String> predictionsDestinationList = [];
   List<BusStop> busStopList = [];
+  List<BusStop> orgDesBusStop = [];
 }
 
 final LocationService ls = LocationService();
@@ -38,7 +39,6 @@ class _HomeWidgetState extends State<HomeWidget> {
             child: CircularProgressIndicator(),
           );
         } else if (state is BusStopErrorState) {
-          print(state);
         } else if (state is BusStopLoadedState) {
           widget.busStopList = state.busStop;
           return Column(
@@ -54,7 +54,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                           decoration: const InputDecoration(hintText: 'Origin'),
                           onChanged: (value) async {
                             final result = await ls.getAutocompleteLocation(value);
-                            print(result);
 
                             setState(() {
                               widget.predictionsOriginList = result;
@@ -75,17 +74,19 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ),
                         IconButton(
                           onPressed: () async {
-                            gettingNearestBusStop(
+                            widget.orgDesBusStop = await gettingNearestBusStop(
                                 widget.originLat, widget.originLng, widget.destinationLat, widget.destinationLng);
+
+                            print(widget.orgDesBusStop);
 
                             setState(() {
                               // widget.busStopList = state.busStop;
                             });
                             ls.getDirections(widget.originController.text, widget.destinationController.text);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => BusStopScreen()),
-                            );
+                            // // Navigator.push(
+                            // //   context,
+                            // //   MaterialPageRoute(builder: (context) => BusStopScreen()),
+                            // // );
                           },
                           icon: const Icon(
                             Icons.search,
@@ -165,7 +166,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  void gettingNearestBusStop(double oriLat, double oriLng, double dstLat, double dstLng) async {
+  Future<List<BusStop>> gettingNearestBusStop(double oriLat, double oriLng, double dstLat, double dstLng) async {
     double nearestDistanceToOrigin = 1000;
     double possibleNearestDistanceToOrigin;
     double nearestDistanceToDestination = 1000;
@@ -176,8 +177,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     double busStopLatOrg;
     double busStopLngDst;
     double busStopLatDst;
-    String? nearestBusStopOrg;
-    String? nearestBusStopDst;
+    BusStop? nearestOrgBusStop;
+    BusStop? nearestDstBusStop;
+
+    List<BusStop> BusStops = [];
     List<Iterable<BusStop>> courseStageBusStops = await widget.dm.busStopByIdCourseStage(74);
 
     widget.busStopList.forEach((busStop) {
@@ -192,12 +195,16 @@ class _HomeWidgetState extends State<HomeWidget> {
 
       if (possibleNearestDistanceToOrigin < nearestDistanceToOrigin) {
         nearestDistanceToOrigin = possibleNearestDistanceToOrigin;
-        nearestBusStopOrg = busStop.name;
+        nearestOrgBusStop = busStop;
       }
       if (possibleNearestDistanceToDestination < nearestDistanceToDestination) {
         nearestDistanceToDestination = possibleNearestDistanceToDestination;
-        nearestBusStopDst = busStop.name;
+        nearestDstBusStop = busStop;
       }
     });
+    BusStops.add(nearestOrgBusStop!);
+    BusStops.add(nearestDstBusStop!);
+
+    return BusStops;
   }
 }
