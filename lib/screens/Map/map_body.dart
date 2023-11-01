@@ -1,17 +1,17 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:pv_analizer/screens/Map/cubit/google_map_cubit.dart';
-import 'package:pv_analizer/screens/BusStop/bus_stop_body.dart';
+
 import 'package:pv_analizer/widgets/List_tile_of_course.dart';
 
 class MapBody extends StatefulWidget {
-  const MapBody({Key? key}) : super(key: key);
+  const MapBody({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<MapBody> createState() => _MapWidgetState();
@@ -19,55 +19,73 @@ class MapBody extends StatefulWidget {
 
 class _MapWidgetState extends State<MapBody> {
   bool isLeftAligned = true;
-  final String? key = dotenv.env['API_KEY'];
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
-  final TextEditingController originController = TextEditingController();
-  final TextEditingController destinationController = TextEditingController();
-  var _polylineIdCounter = 0;
-  var _polygonIdCounter = 0;
+  final String? apiKey = dotenv.env['API_KEY'];
+
+  Set<Marker> markers = {};
+
+  GoogleMapController? mapController;
+  final Set<Polyline> _polylines = {};
+
+  List<LatLng> listLocations = [
+    const LatLng(50.018690000, 22.026230000),
+    const LatLng(50.031660000, 22.033500000),
+    const LatLng(50.034520000, 22.033430000),
+    const LatLng(50.022710000, 21.982480000),
+    const LatLng(50.023290000, 21.980970000),
+  ];
 
   final List<LatLng> polygonLatLngs = <LatLng>[];
-  List<LatLng> polylineCoordinates = [];
-  static const LatLng sourceLocation = LatLng(50.018690000, 22.02623000);
-  static const LatLng destination = LatLng(50.031660000, 22.03350000);
-  void getPolyPoints() async {
+
+  CameraPosition kGooglePlex = const CameraPosition(
+    target: LatLng(50.041187, 21.999121),
+    zoom: 12.5,
+  );
+
+  Future<List<LatLng>> getPolylineCoordinates() async {
     PolylinePoints polylinePoints = PolylinePoints();
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      key!, // Your Google Map Key
-      PointLatLng(sourceLocation.latitude, sourceLocation.longitude),
-      PointLatLng(destination.latitude, destination.longitude),
-    );
-    if (result.points.isNotEmpty) {
-      result.points.forEach(
-        (PointLatLng point) => polylineCoordinates.add(
-          LatLng(point.latitude, point.longitude),
-        ),
+    List<PointLatLng> result = [];
+
+    for (var i = 0; i < listLocations.length - 1; i++) {
+      PointLatLng currentLocation = PointLatLng(listLocations[i].latitude, listLocations[i].longitude);
+      PointLatLng nextLocation = PointLatLng(listLocations[i + 1].latitude, listLocations[i + 1].longitude);
+      ;
+
+      PolylineResult polylineResult = await polylinePoints.getRouteBetweenCoordinates(
+        apiKey!,
+        currentLocation,
+        nextLocation,
       );
-      setState(() {});
+
+      if (polylineResult.points.isNotEmpty) {
+        result.addAll(polylineResult.points);
+
+        setState(() {});
+      }
     }
+
+    return result.map((point) => LatLng(point.latitude, point.longitude)).toList();
+  }
+
+  void _drawPolyline() async {
+    List<LatLng> polylineCoordinates = await getPolylineCoordinates();
+
+    setState(() {
+      _polylines.add(Polyline(
+        polylineId: const PolylineId('route'),
+        color: Colors.blue,
+        width: 6,
+        points: polylineCoordinates,
+      ));
+    });
   }
 
   @override
   void initState() {
-    getPolyPoints();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    Future<void> goToPlace(double lat, double lng) async {
-      final GoogleMapController controller = await _controller.future;
-      await controller.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(lat, lng), zoom: 14),
-        ),
-      );
-    }
-
-    const CameraPosition kGooglePlex = CameraPosition(
-      target: LatLng(50.041187, 21.999121),
-      zoom: 12.5,
-    );
     return Scaffold(
       appBar: AppBar(),
       body: Column(
@@ -80,30 +98,28 @@ class _MapWidgetState extends State<MapBody> {
             child: Stack(
               children: [
                 GoogleMap(
-                  initialCameraPosition: kGooglePlex,
-                  mapType: MapType.terrain,
-                  markers: {
-                    const Marker(
-                      markerId: MarkerId("source"),
-                      position: sourceLocation,
-                    ),
-                    const Marker(
-                      markerId: MarkerId("destination"),
-                      position: destination,
-                    ),
-                  },
-                  onMapCreated: (mapController) {
-                    _controller.complete(mapController);
-                  },
-                  polylines: {
-                    Polyline(
-                        polylineId: const PolylineId('route'),
-                        points: polylineCoordinates,
-                        color: const Color(0xFF7B61FF),
-                        width: 6),
-                  },
-                ),
-                // ),
+                    initialCameraPosition: kGooglePlex,
+                    mapType: MapType.terrain,
+                    onMapCreated: (GoogleMapController controller) {
+                      _drawPolyline();
+                    },
+                    polylines: _polylines,
+                    markers: {
+                      Marker(
+                        markerId: const MarkerId('origin'),
+                        position: LatLng(
+                          listLocations.first.latitude,
+                          listLocations.first.longitude,
+                        ),
+                      ),
+                      Marker(
+                        markerId: const MarkerId('destination'),
+                        position: LatLng(
+                          listLocations.last.latitude,
+                          listLocations.last.longitude,
+                        ),
+                      ),
+                    }),
                 GestureDetector(
                   onHorizontalDragEnd: (details) {
                     if (details.primaryVelocity! > 0) {

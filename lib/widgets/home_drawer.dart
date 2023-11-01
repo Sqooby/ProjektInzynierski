@@ -8,8 +8,6 @@ import '../screens/Login/login_screen.dart';
 class HomeDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    bool isSelected = true;
-
     Widget ItemDrawer(String name, IconData icon, dynamic onTap) {
       return Ink(
         child: ListTile(

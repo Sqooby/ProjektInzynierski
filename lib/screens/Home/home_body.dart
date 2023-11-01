@@ -83,10 +83,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                               // widget.busStopList = state.busStop;
                             });
                             ls.getDirections(widget.originController.text, widget.destinationController.text);
-                            // // Navigator.push(
-                            // //   context,
-                            // //   MaterialPageRoute(builder: (context) => BusStopScreen()),
-                            // // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => BusStopScreen()),
+                            );
                           },
                           icon: const Icon(
                             Icons.search,

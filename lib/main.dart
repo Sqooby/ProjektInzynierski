@@ -7,13 +7,13 @@ import 'package:pv_analizer/repositories/bus_stop_repo.dart';
 
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:pv_analizer/screens/Home/home_screen.dart';
+
+import 'package:pv_analizer/screens/Map/map_body.dart';
 import 'package:pv_analizer/screens/SingUp/sing_up_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pv_analizer/screens/Login/cubit/user_cubit.dart';
 
 import 'package:pv_analizer/repositories/user_repo.dart';
-
-import 'screens/Login/login_screen.dart';
 
 import 'screens/profile/profile_screen.dart';
 
@@ -39,11 +39,10 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         theme: ThemeData(
           primaryColor: const Color.fromRGBO(24, 69, 186, 1),
-          backgroundColor: const Color.fromARGB(255, 26, 82, 224),
           fontFamily: "Lato",
         ),
         themeMode: ThemeMode.light,
-        home: const LoginScreen(),
+        home: const MapBody(),
         initialRoute: '/',
         routes: {
           '/profile': (context) => const ProfileScreen(),

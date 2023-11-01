@@ -28,7 +28,8 @@ class _HomeScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MapBody();
+    return Container();
+    // return MapBody();
     // return SafeArea(
     //   child: Scaffold(
     //     appBar: AppBar(

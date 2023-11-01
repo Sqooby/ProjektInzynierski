@@ -18,7 +18,6 @@ class LocationService {
   Future<Map<String, dynamic>> getPlace(String input) async {
     final placeId = await getPlaceId(input);
     final String url = 'https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=$key';
-    print(url);
 
     var response = await http.get(Uri.parse(url));
 
@@ -43,7 +42,6 @@ class LocationService {
       'polyline': json['routes'][0]['overview_polyline']['points'],
       'polyline_decoded': PolylinePoints().decodePolyline(json['routes'][0]['overview_polyline']['points']),
     };
-    print(url);
 
     return result;
   }

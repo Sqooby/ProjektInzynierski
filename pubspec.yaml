@@ -42,7 +42,11 @@ dependencies:
   geolocator: ^9.0.2
   google_geocoding: ^0.2.0
   google_maps_flutter: ^2.2.8
-  location: ^4.4.0
+  location:
+    git:
+      url: https://github.com/781flyingdutchman/flutterlocation.git
+      ref: 'V4'
+      path: packages/location
 
 
   http: ^0.13.0

@@ -23,7 +23,7 @@ class _PredictionsListTileState extends State<PredictionsListTile> {
           return GestureDetector(
             onTap: () async {
               widget.controllerText = widget.predictionsOriginList[index];
-              print(widget.controllerText);
+
               final place = await widget.getPlace;
               final originLat = place['geometry']['location']['lat'];
               final originLng = place['geometry']['location']['lng'];

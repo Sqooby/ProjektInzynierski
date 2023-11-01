@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+
 import 'package:pv_analizer/screens/Map/map_body.dart';
-import 'package:pv_analizer/screens/Map/map_screen.dart';
 
-class BusStopBody extends StatelessWidget {
-  const BusStopBody({Key? key}) : super(key: key);
+class BusStopBody extends StatefulWidget {
+  @override
+  State<BusStopBody> createState() => _BusStopBodyState();
+}
 
+class _BusStopBodyState extends State<BusStopBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,17 +38,17 @@ class BusStopBody extends StatelessWidget {
       ),
       body: Center(
         child: ListView.builder(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           itemCount: 12,
           itemBuilder: ((context, index) {
-            return Card(child: ListTileCourse(context));
+            return Card(child: listTileCourse(context));
           }),
         ),
       ),
     );
   }
 
-  Widget ListTileCourse(BuildContext context) {
+  Widget listTileCourse(BuildContext context) {
     return ListTile(
       onTap: () {
         Navigator.push(
@@ -92,7 +95,7 @@ class BusStopBody extends StatelessWidget {
           ),
         ),
       ]),
-      trailing: Text("14 min"),
+      trailing: const Text("14 min"),
     );
   }
 }
