@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pv_analizer/DataManager/data_manager.dart';
 import 'package:pv_analizer/models/busStop.dart';
+import 'package:pv_analizer/models/course_stage_list.dart';
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:pv_analizer/screens/BusStop/bus_stop_screen.dart';
@@ -76,17 +77,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                           onPressed: () async {
                             widget.orgDesBusStop = await gettingNearestBusStop(
                                 widget.originLat, widget.originLng, widget.destinationLat, widget.destinationLng);
-
-                            print(widget.orgDesBusStop);
-
-                            setState(() {
-                              // widget.busStopList = state.busStop;
-                            });
-                            ls.getDirections(widget.originController.text, widget.destinationController.text);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => BusStopScreen()),
-                            );
+                            final courseMap = await gettingMapBusStopNameAndStage();
+                            print(courseMap);
                           },
                           icon: const Icon(
                             Icons.search,
@@ -171,7 +163,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     double possibleNearestDistanceToOrigin;
     double nearestDistanceToDestination = 1000;
     double possibleNearestDistanceToDestination;
-    List<int> idCourseStage = [74, 75, 76, 77, 78];
 
     double busStopLngOrg;
     double busStopLatOrg;
@@ -181,7 +172,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     BusStop? nearestDstBusStop;
 
     List<BusStop> BusStops = [];
-    List<Iterable<BusStop>> courseStageBusStops = await widget.dm.busStopByIdCourseStage(74);
 
     widget.busStopList.forEach((busStop) {
       busStopLatOrg = double.parse(busStop.gpsN);
@@ -206,5 +196,35 @@ class _HomeWidgetState extends State<HomeWidget> {
     BusStops.add(nearestDstBusStop!);
 
     return BusStops;
+  }
+
+  Future<List> gettingMapBusStopNameAndStage() async {
+    final List<Iterable<BusStop>> course74Bus = await widget.dm.busStopByIdCourseStage(74);
+    final List<CourseStageList> course_74 = await widget.dm.courseStageByidCourse(74);
+    final List courseMap = [];
+    Set<String> uniqueNames = {};
+
+    for (var i = 0; i < course_74.length; i++) {
+      if (widget.orgDesBusStop[0].name == course74Bus[i].first.name ||
+          widget.orgDesBusStop[1].name == course74Bus[i].first.name) {
+        String name = course74Bus[i].first.name;
+        if (!uniqueNames.contains(name)) {
+          Map<String, dynamic> course = {
+            'stage': course_74[i].stage.toString(),
+            'name': name,
+          };
+          courseMap.add(course);
+          uniqueNames.add(name);
+        } else {
+          // If the name is already in the Set, update the 'stage' property if needed
+          for (var existingCourse in courseMap) {
+            if (existingCourse['name'] == name) {
+              break;
+            }
+          }
+        }
+      }
+    }
+    return courseMap;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:pv_analizer/models/busStop.dart';
+import 'package:pv_analizer/models/course_stage_list.dart';
 import 'package:pv_analizer/repositories/bus_stop_repo.dart';
 import 'package:pv_analizer/repositories/course_stage_repo.dart';
 
@@ -17,5 +18,15 @@ class DataManager {
     }).toList();
 
     return busStopByCourse;
+  }
+
+  Future<List<CourseStageList>> courseStageByidCourse(int idCourseStage) async {
+    final busStop = await _busStopRepo.getBusStop();
+
+    final courseStage = await _courseStageRepo.getCourseStage();
+    final courseStageByIdCourse = courseStage.where((e) => e.id_course == idCourseStage).map((course) {
+      return course;
+    }).toList();
+    return courseStageByIdCourse;
   }
 }

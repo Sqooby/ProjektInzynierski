@@ -76,6 +76,7 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                   //   height: 20,
                                   // ),
                                   LoginWidget(
+                                    textInputType: TextInputType.emailAddress,
                                     text: "Email",
                                     controller: widget.mail,
                                   ),
@@ -84,10 +85,12 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                     controller: widget.userName,
                                   ),
                                   LoginWidget(
+                                    textInputType: TextInputType.visiblePassword,
                                     text: "Hasło",
                                     controller: widget.password,
                                   ),
                                   LoginWidget(
+                                    textInputType: TextInputType.visiblePassword,
                                     text: "Powtórz Hasło",
                                     controller: widget.passwordConfirmation,
                                   ),
@@ -100,10 +103,12 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                     controller: widget.lastName,
                                   ),
                                   LoginWidget(
+                                    textInputType: TextInputType.phone,
                                     text: "Numer telefonu",
                                     controller: widget.phoneNumber,
                                   ),
                                   LoginWidget(
+                                    textInputType: TextInputType.streetAddress,
                                     text: "Adres domowy",
                                     controller: widget.homeAddress,
                                   ),

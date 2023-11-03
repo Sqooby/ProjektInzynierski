@@ -38,7 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: const Color.fromRGBO(226, 226, 226, 1),
       body: BlocBuilder<UserCubit, UserState>(
         builder: ((context, state) {
-          print(state);
           if (state is UserErrorState) {
           } else if (state is UserLoadingState) {
             return const Center(
@@ -58,8 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontWeight: FontWeight.bold,
                       fontSize: 30,
                       color: Theme.of(context).primaryColor,
-
-                      // fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -82,6 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Column(
                           children: [
                             LoginWidget(
+                              textInputType: TextInputType.emailAddress,
                               text: "mail",
                               controller: mailController,
                             ),
@@ -105,10 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 context,
                                 MaterialPageRoute(builder: (context) => HomeScreen()),
                               );
-                              // final busStopByCourse = await DataManager().busStopByIdCourseStage(75);
-                              // for (var x in busStopByCourse) {
-                              //   print(x.first.name);
-                              // }
                             },
                             child: const Text(
                               "Zaloguj się",

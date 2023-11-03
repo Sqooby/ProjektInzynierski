@@ -5,7 +5,8 @@ class LoginWidget extends StatefulWidget {
   // final String errorText;
   final String text;
   final TextEditingController controller;
-  LoginWidget({required this.text, required this.controller});
+  final TextInputType textInputType;
+  LoginWidget({required this.text, required this.controller, this.textInputType = TextInputType.name});
 
   @override
   State<LoginWidget> createState() => _LoginWidgetState();
@@ -29,6 +30,7 @@ class _LoginWidgetState extends State<LoginWidget> {
             margin: const EdgeInsets.symmetric(horizontal: 10),
             child: Center(
               child: TextFormField(
+                keyboardType: widget.textInputType,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter some text';

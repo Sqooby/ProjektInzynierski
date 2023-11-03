@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
+import 'package:pv_analizer/screens/Login/login_screen.dart';
 import 'package:pv_analizer/screens/Map/cubit/google_map_cubit.dart';
 import 'package:pv_analizer/repositories/bus_stop_repo.dart';
 
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
           fontFamily: "Lato",
         ),
         themeMode: ThemeMode.light,
-        home: const MapBody(),
+        home: const LoginScreen(),
         initialRoute: '/',
         routes: {
           '/profile': (context) => const ProfileScreen(),
