@@ -202,29 +202,47 @@ class _HomeWidgetState extends State<HomeWidget> {
     final List<Iterable<BusStop>> course74Bus = await widget.dm.busStopByIdCourseStage(74);
     final List<CourseStageList> course_74 = await widget.dm.courseStageByidCourse(74);
     final List courseMap = [];
-    Set<String> uniqueNames = {};
+    final Set<String> uniqueNames = {};
+    int firstIndex = -1;
+    int lastIndex = -1;
 
     for (var i = 0; i < course_74.length; i++) {
       if (widget.orgDesBusStop[0].name == course74Bus[i].first.name ||
           widget.orgDesBusStop[1].name == course74Bus[i].first.name) {
         String name = course74Bus[i].first.name;
         if (!uniqueNames.contains(name)) {
+          if (firstIndex == -1) {
+            // Store the index of the first occurrence of the name
+            firstIndex = i;
+          }
+          // Store the index of the last occurrence of the name
+          lastIndex = i;
           Map<String, dynamic> course = {
             'stage': course_74[i].stage.toString(),
             'name': name,
+            'gps_n': course74Bus[i].first.gpsN,
+            'gps_e': course74Bus[i].first.gpsE,
           };
           courseMap.add(course);
           uniqueNames.add(name);
-        } else {
-          // If the name is already in the Set, update the 'stage' property if needed
-          for (var existingCourse in courseMap) {
-            if (existingCourse['name'] == name) {
-              break;
-            }
-          }
         }
       }
     }
+
+    // Add all elements between the first and last occurrence of the name
+    if (firstIndex != -1 && lastIndex != -1 && lastIndex > firstIndex) {
+      for (var i = firstIndex + 1; i < lastIndex; i++) {
+        String name = course74Bus[i].first.name;
+        Map<String, dynamic> course = {
+          'stage': course_74[i].stage.toString(),
+          'name': name,
+          'gps_n': course74Bus[i].first.gpsN,
+          'gps_e': course74Bus[i].first.gpsE,
+        };
+        courseMap.add(course);
+      }
+    }
+    courseMap.sort((a, b) => int.parse(a['stage']).compareTo(int.parse(b['stage'])));
     return courseMap;
   }
 }
