@@ -51,10 +51,10 @@ class _BusStopBodyState extends State<BusStopBody> {
   Widget listTileCourse(BuildContext context) {
     return ListTile(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MapBody()),
-        );
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => const MapBody()),
+        // );
       },
       style: ListTileStyle.drawer,
       title: const Row(children: [

@@ -7,6 +7,7 @@ import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:pv_analizer/screens/BusStop/bus_stop_screen.dart';
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
+import 'package:pv_analizer/screens/Map/map_body.dart';
 
 // ignore: must_be_immutable
 class HomeWidget extends StatefulWidget {
@@ -78,7 +79,14 @@ class _HomeWidgetState extends State<HomeWidget> {
                             widget.orgDesBusStop = await gettingNearestBusStop(
                                 widget.originLat, widget.originLng, widget.destinationLat, widget.destinationLng);
                             final courseMap = await gettingMapBusStopNameAndStage();
-                            print(courseMap);
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MapBody(
+                                        courseStageMap: courseMap,
+                                      )),
+                            );
                           },
                           icon: const Icon(
                             Icons.search,
