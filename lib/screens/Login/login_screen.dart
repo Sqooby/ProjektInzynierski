@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:pv_analizer/screens/Login/cubit/user_cubit.dart';
@@ -24,7 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final cubit = context.read<UserCubit>();
@@ -49,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(30),
+                  padding: const EdgeInsets.all(27),
                   child: Text(
                     'TransMazor',
                     style: TextStyle(
@@ -61,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 SizedBox(
-                  height: 80,
+                  height: 50,
                   child: Image.asset(
                     'assets/Icons/thunderbolt.png',
                     color: Theme.of(context).primaryColor,
@@ -73,7 +74,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   child: Card(
-                    // color: Colors.white,
                     child: Column(
                       children: [
                         Column(
@@ -86,6 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             LoginWidget(
                               text: "Hasło",
                               controller: passwordController,
+                              textInputType: TextInputType.visiblePassword,
+                              obscureText: true,
                             ),
                             const SizedBox(
                               height: 5,
@@ -93,16 +95,43 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(5),
                           width: double.infinity,
                           color: Theme.of(context).primaryColor,
                           alignment: Alignment.center,
                           child: TextButton(
                             onPressed: () async {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => HomeScreen()),
-                              );
+                              var result = state.users.any((element) =>
+                                  element.email == mailController.text && element.password == passwordController.text);
+                              if (result) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                                );
+                              } else {
+                                showBottomSheet(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      height: 64,
+                                      color: Colors.black12,
+                                      child: Center(
+                                          child: !result
+                                              ? const Text(
+                                                  "Złe dane!!!",
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                )
+                                              : const Text('')),
+                                    );
+                                  },
+                                );
+                                Timer(const Duration(seconds: 2), () {
+                                  Navigator.of(context).pop();
+                                });
+                              }
                             },
                             child: const Text(
                               "Zaloguj się",
@@ -121,7 +150,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 80,
                   ),
                 ),
-                const SizedBox(height: 15),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -147,20 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 50),
-                  child: const Column(
-                    children: [],
-                  ),
-                ),
               ],
-            );
-          } else if (state is UserLoadingState) {
-            return const Center(
-              child: CircularProgressIndicator(),
             );
           }
           return Container();

@@ -6,7 +6,12 @@ class LoginWidget extends StatefulWidget {
   final String text;
   final TextEditingController controller;
   final TextInputType textInputType;
-  LoginWidget({required this.text, required this.controller, this.textInputType = TextInputType.name});
+  final bool obscureText;
+  LoginWidget(
+      {required this.text,
+      required this.controller,
+      this.textInputType = TextInputType.name,
+      this.obscureText = false});
 
   @override
   State<LoginWidget> createState() => _LoginWidgetState();
@@ -16,9 +21,14 @@ class _LoginWidgetState extends State<LoginWidget> {
   FocusNode myFocusNode = new FocusNode();
   @override
   void initState() {
-    // TODO: implement initStat
     myFocusNode = FocusNode();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    myFocusNode.dispose();
+    super.dispose();
   }
 
   Widget build(BuildContext context) {
@@ -40,6 +50,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                 controller: widget.controller,
                 autofocus: false,
                 focusNode: myFocusNode,
+                obscureText: widget.obscureText,
                 style: const TextStyle(letterSpacing: 3, fontSize: 18, fontWeight: FontWeight.bold),
                 decoration: InputDecoration(
                   labelText: widget.text,

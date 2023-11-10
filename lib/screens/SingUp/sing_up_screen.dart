@@ -24,7 +24,6 @@ class SingUpScreen extends StatefulWidget {
 }
 
 class _SingUpScreenState extends State<SingUpScreen> {
-  @override
   bool checkedValue = false;
   final _formKey = GlobalKey<FormState>();
   String role = 'client';
@@ -64,7 +63,11 @@ class _SingUpScreenState extends State<SingUpScreen> {
                         Container(
                           padding: const EdgeInsets.all(8),
                           margin: const EdgeInsets.only(top: 20),
-                          // ignore: sort_child_properties_last
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(color: Colors.blue.shade900, blurRadius: 10, spreadRadius: 0.3),
+                            ],
+                          ),
                           child: Form(
                             key: _formKey,
                             child: Card(
@@ -72,9 +75,6 @@ class _SingUpScreenState extends State<SingUpScreen> {
                               elevation: 5,
                               child: Column(
                                 children: [
-                                  // SizedBox(
-                                  //   height: 20,
-                                  // ),
                                   LoginWidget(
                                     textInputType: TextInputType.emailAddress,
                                     text: "Email",
@@ -88,11 +88,12 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                     textInputType: TextInputType.visiblePassword,
                                     text: "Hasło",
                                     controller: widget.password,
+                                    obscureText: true,
                                   ),
                                   LoginWidget(
-                                    textInputType: TextInputType.visiblePassword,
                                     text: "Powtórz Hasło",
                                     controller: widget.passwordConfirmation,
+                                    obscureText: true,
                                   ),
                                   LoginWidget(
                                     text: "Imie",
@@ -112,7 +113,6 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                     text: "Adres domowy",
                                     controller: widget.homeAddress,
                                   ),
-
                                   Container(
                                     padding: const EdgeInsets.only(left: 15, bottom: 10),
                                     child: Row(
@@ -147,7 +147,9 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                         style: TextStyle(color: Colors.white, fontSize: 26),
                                       ),
                                       onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
+                                        if (_formKey.currentState!.validate() &&
+                                            widget.mail.text.contains('@') &&
+                                            widget.password.text == widget.password.text) {
                                           context.read<UserCubit>().registerUser(
                                                 User(
                                                   idUser: 99,
@@ -171,6 +173,8 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                             const SnackBar(content: Text('Pomyślne zarejestrowanie')),
                                           );
                                           Navigator.of(context).pop();
+                                        } else {
+                                          print('$_formKey');
                                         }
                                       },
                                     ),
@@ -178,11 +182,6 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                 ],
                               ),
                             ),
-                          ),
-                          decoration: BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(color: Colors.blue.shade900, blurRadius: 10, spreadRadius: 0.3),
-                            ],
                           ),
                         ),
                       ],
