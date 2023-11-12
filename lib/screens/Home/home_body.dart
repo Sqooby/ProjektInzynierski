@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pv_analizer/DataManager/data_manager.dart';
@@ -5,12 +7,13 @@ import 'package:pv_analizer/models/busStop.dart';
 import 'package:pv_analizer/models/course_stage_list.dart';
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:pv_analizer/screens/BusStop/bus_stop_screen.dart';
+
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/screens/Map/map_body.dart';
 
 // ignore: must_be_immutable
 class HomeWidget extends StatefulWidget {
+  static String routeName = '/home';
   HomeWidget({Key? key}) : super(key: key);
 
   @override
@@ -76,17 +79,19 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ),
                         IconButton(
                           onPressed: () async {
+                            // final cos = widget.dm.busStopByCourseStages([74, 75, 76, 77, 78]);
+                            // final cos1 = widget.dm.courseStagesByCourse([74, 75, 76, 77, 78]);
                             widget.orgDesBusStop = await gettingNearestBusStop(
                                 widget.originLat, widget.originLng, widget.destinationLat, widget.destinationLng);
                             final courseMap = await gettingMapBusStopNameAndStage();
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MapBody(
-                                        courseStageMap: courseMap,
-                                      )),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //       builder: (context) => MapBody(
+                            //             courseStageMap: courseMap,
+                            //           )),
+                            // );
                           },
                           icon: const Icon(
                             Icons.search,
@@ -206,51 +211,49 @@ class _HomeWidgetState extends State<HomeWidget> {
     return BusStops;
   }
 
-  Future<List> gettingMapBusStopNameAndStage() async {
-    final List<Iterable<BusStop>> course74Bus = await widget.dm.busStopByIdCourseStage(74);
-    final List<CourseStageList> course_74 = await widget.dm.courseStageByidCourse(74);
-    final List courseMap = [];
-    final Set<String> uniqueNames = {};
+  Future<Map<String, List<dynamic>>> gettingMapBusStopNameAndStage() async {
+    final Map<String, List<dynamic>> courseMap = {};
+
     int firstIndex = -1;
     int lastIndex = -1;
+    for (var i in [74, 75, 76, 77, 78]) {
+      final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(i);
+      final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(i);
+      List<dynamic> courseList = [];
+      final Set<String> uniqueNames = {};
+      for (var x = 0; x < busStopbyId.length; x++) {
+        if (widget.orgDesBusStop[0].name == busStopbyId[x].first.name ||
+            widget.orgDesBusStop[1].name == busStopbyId[x].first.name) {
+          String name = busStopbyId[x].first.name;
 
-    for (var i = 0; i < course_74.length; i++) {
-      if (widget.orgDesBusStop[0].name == course74Bus[i].first.name ||
-          widget.orgDesBusStop[1].name == course74Bus[i].first.name) {
-        String name = course74Bus[i].first.name;
-        if (!uniqueNames.contains(name)) {
-          if (firstIndex == -1) {
-            // Store the index of the first occurrence of the name
-            firstIndex = i;
+          if (!uniqueNames.contains(name)) {
+            if (firstIndex == -1) {
+              // Store the index of the first occurrence of the name
+              firstIndex = x;
+            }
+            // Store the index of the last occurrence of the name
+            lastIndex = x;
+            Map<String, dynamic> course = {
+              'stage': courseStageById[x].stage.toString(),
+              'name': name,
+              'gps_n': busStopbyId[x].first.gpsN,
+              'gps_e': busStopbyId[x].first.gpsE,
+              'id_course': i
+            };
+
+            courseList.add(course);
+
+            uniqueNames.add(name);
           }
-          // Store the index of the last occurrence of the name
-          lastIndex = i;
-          Map<String, dynamic> course = {
-            'stage': course_74[i].stage.toString(),
-            'name': name,
-            'gps_n': course74Bus[i].first.gpsN,
-            'gps_e': course74Bus[i].first.gpsE,
-          };
-          courseMap.add(course);
-          uniqueNames.add(name);
         }
       }
-    }
-
-    // Add all elements between the first and last occurrence of the name
-    if (firstIndex != -1 && lastIndex != -1 && lastIndex > firstIndex) {
-      for (var i = firstIndex + 1; i < lastIndex; i++) {
-        String name = course74Bus[i].first.name;
-        Map<String, dynamic> course = {
-          'stage': course_74[i].stage.toString(),
-          'name': name,
-          'gps_n': course74Bus[i].first.gpsN,
-          'gps_e': course74Bus[i].first.gpsE,
-        };
-        courseMap.add(course);
+      if (courseList.length == 1) {
+        courseList = [];
+      } else {
+        courseMap['$i'] = courseList;
       }
     }
-    courseMap.sort((a, b) => int.parse(a['stage']).compareTo(int.parse(b['stage'])));
+
     return courseMap;
   }
 }
