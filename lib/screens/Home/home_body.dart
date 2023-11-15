@@ -7,6 +7,7 @@ import 'package:pv_analizer/models/busStop.dart';
 import 'package:pv_analizer/models/course_stage_list.dart';
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:pv_analizer/screens/BusStop/bus_stop_screen.dart';
 
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/screens/Map/map_body.dart';
@@ -79,19 +80,17 @@ class _HomeWidgetState extends State<HomeWidget> {
                         ),
                         IconButton(
                           onPressed: () async {
-                            // final cos = widget.dm.busStopByCourseStages([74, 75, 76, 77, 78]);
-                            // final cos1 = widget.dm.courseStagesByCourse([74, 75, 76, 77, 78]);
                             widget.orgDesBusStop = await gettingNearestBusStop(
                                 widget.originLat, widget.originLng, widget.destinationLat, widget.destinationLng);
                             final courseMap = await gettingMapBusStopNameAndStage();
 
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //       builder: (context) => MapBody(
-                            //             courseStageMap: courseMap,
-                            //           )),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => BusStopScreen(
+                                        courseMap: courseMap,
+                                      )),
+                            );
                           },
                           icon: const Icon(
                             Icons.search,
@@ -125,6 +124,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               widget.originController.text = widget.predictionsOriginList[index];
 
               final place = await ls.getPlace(widget.originController.text);
+              print(place);
 
               widget.originLat = place['geometry']['location']['lat'];
               widget.originLng = place['geometry']['location']['lng'];
@@ -216,14 +216,18 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     int firstIndex = -1;
     int lastIndex = -1;
-    for (var i in [74, 75, 76, 77, 78]) {
+    for (var i in [79, 80, 81]) {
       final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(i);
       final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(i);
+      bool checked = false;
+      int index = 0;
       List<dynamic> courseList = [];
       final Set<String> uniqueNames = {};
       for (var x = 0; x < busStopbyId.length; x++) {
         if (widget.orgDesBusStop[0].name == busStopbyId[x].first.name ||
             widget.orgDesBusStop[1].name == busStopbyId[x].first.name) {
+          index = x;
+          checked = true;
           String name = busStopbyId[x].first.name;
 
           if (!uniqueNames.contains(name)) {
@@ -245,14 +249,39 @@ class _HomeWidgetState extends State<HomeWidget> {
 
             uniqueNames.add(name);
           }
+        } else if (checked) {
+          String name = busStopbyId[x].first.name;
+          if (!uniqueNames.contains(name)) {
+            if (firstIndex == -1) {
+              // Store the index of the first occurrence of the name
+              firstIndex = x;
+            }
+            // Store the index of the last occurrence of the name
+            lastIndex = x;
+            Map<String, dynamic> course = {
+              'stage': courseStageById[x].stage.toString(),
+              'name': name,
+              'gps_n': busStopbyId[x].first.gpsN,
+              'gps_e': busStopbyId[x].first.gpsE,
+              'id_course': i
+            };
+
+            courseList.add(course);
+
+            uniqueNames.add(name);
+          }
         }
       }
-      if (courseList.length == 1) {
+      if (courseList.length < 2) {
         courseList = [];
       } else {
         courseMap['$i'] = courseList;
       }
     }
+    print('79');
+    print(courseMap['79']);
+    print('80');
+    print(courseMap['80']);
 
     return courseMap;
   }

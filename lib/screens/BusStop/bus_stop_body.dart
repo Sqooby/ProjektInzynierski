@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-
-import 'package:pv_analizer/screens/Map/map_body.dart';
+import '../Map/map_body.dart';
 
 class BusStopBody extends StatefulWidget {
   @override
+  final Map<String, List<dynamic>> courseMap;
+
+  const BusStopBody({Key? key, required this.courseMap}) : super(key: key);
   State<BusStopBody> createState() => _BusStopBodyState();
 }
 
@@ -12,24 +14,24 @@ class _BusStopBodyState extends State<BusStopBody> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        bottom: const PreferredSize(
+        bottom: PreferredSize(
           preferredSize: Size.fromHeight(60),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Padding(
-                padding: EdgeInsets.only(right: 300, top: 8, bottom: 8, left: 8),
+                padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8),
                 child: Text(
-                  'Origin',
-                  style: TextStyle(fontSize: 24),
+                  widget.courseMap.values.first.first['name'],
+                  style: const TextStyle(fontSize: 24),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  'Destiantions',
-                  style: TextStyle(fontSize: 24),
+                  widget.courseMap.values.first.last['name'],
+                  style: const TextStyle(fontSize: 24),
                 ),
               ),
             ],
@@ -39,31 +41,38 @@ class _BusStopBodyState extends State<BusStopBody> {
       body: Center(
         child: ListView.builder(
           padding: const EdgeInsets.all(10),
-          itemCount: 12,
+          itemCount: 2,
           itemBuilder: ((context, index) {
-            return Card(child: listTileCourse(context));
+            return Card(child: listTileCourse(context, index));
           }),
         ),
       ),
     );
   }
 
-  Widget listTileCourse(BuildContext context) {
+  Widget listTileCourse(BuildContext context, int index) {
+    var keys = widget.courseMap.keys.toList();
+    var val = widget.courseMap[keys[index]];
+
     return ListTile(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (context) => const MapBody()),
-        // );
+        print(val);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => MapBody(
+                    courseStageMap: widget.courseMap[keys[index]],
+                  )),
+        );
       },
       style: ListTileStyle.drawer,
-      title: const Row(children: [
-        Icon(Icons.bus_alert_rounded),
+      title: Row(children: [
+        const Icon(Icons.bus_alert_rounded),
         Card(
-          margin: EdgeInsets.all(5),
+          margin: const EdgeInsets.all(5),
           child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text("Number"),
+            padding: const EdgeInsets.all(8.0),
+            child: Text(widget.courseMap['80']![0]['id_course'].toString()),
           ),
         )
       ]),
@@ -71,7 +80,7 @@ class _BusStopBodyState extends State<BusStopBody> {
         padding: EdgeInsets.only(right: 10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [Text('odjazd za:'), Text("czas")],
+          children: [Text('odjazd :'), Text("czas")],
         ),
       ),
       subtitle: const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [

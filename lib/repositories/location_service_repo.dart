@@ -7,6 +7,7 @@ class LocationService {
   final String? key = dotenv.env['API_KEY'];
   Future<String> getPlaceId(String input) async {
     final String url = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=$input&key=$key';
+
     var response = await http.get(Uri.parse(url));
     var json = convert.jsonDecode(response.body);
 
@@ -53,10 +54,12 @@ class LocationService {
 
     try {
       var json = convert.jsonDecode(response.body);
+
       List<String> places = [];
       for (var predictions in json['predictions']) {
         places.add(predictions['description']);
       }
+
       return places;
     } catch (e) {
       throw 'e';

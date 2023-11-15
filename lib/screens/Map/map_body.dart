@@ -11,7 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pv_analizer/widgets/List_tile_of_course.dart';
 
 class MapBody extends StatefulWidget {
-  final List<dynamic> courseStageMap;
+  final List<dynamic>? courseStageMap;
   const MapBody({
     Key? key,
     required this.courseStageMap,
@@ -60,11 +60,11 @@ class _MapWidgetState extends State<MapBody> {
     PolylinePoints polylinePoints = PolylinePoints();
     List<PointLatLng> result = [];
 
-    for (var i = 0; i < widget.courseStageMap.length - 1; i++) {
-      PointLatLng currentLocation =
-          PointLatLng(double.parse(widget.courseStageMap[i]['gps_n']), double.parse(widget.courseStageMap[i]['gps_e']));
+    for (var i = 0; i < widget.courseStageMap!.length - 1; i++) {
+      PointLatLng currentLocation = PointLatLng(
+          double.parse(widget.courseStageMap![i]['gps_n']), double.parse(widget.courseStageMap![i]['gps_e']));
       PointLatLng nextLocation = PointLatLng(
-          double.parse(widget.courseStageMap[i + 1]['gps_n']), double.parse(widget.courseStageMap[i + 1]['gps_e']));
+          double.parse(widget.courseStageMap![i + 1]['gps_n']), double.parse(widget.courseStageMap![i + 1]['gps_e']));
       ;
 
       PolylineResult polylineResult = await polylinePoints.getRouteBetweenCoordinates(
@@ -85,9 +85,9 @@ class _MapWidgetState extends State<MapBody> {
 
   Future<Set<Marker>> getMarkerCoordinates() async {
     Set<Marker> markers = {};
-    for (var i = 0; i < widget.courseStageMap.length; i++) {
-      double gpsN = double.parse(widget.courseStageMap[i]['gps_n']);
-      double gpsE = double.parse(widget.courseStageMap[i]['gps_e']);
+    for (var i = 0; i < widget.courseStageMap!.length; i++) {
+      double gpsN = double.parse(widget.courseStageMap![i]['gps_n']);
+      double gpsE = double.parse(widget.courseStageMap![i]['gps_e']);
       Uint8List markerIcon = await getMarkerIcon(i + 1);
       String markerId = 'marker_$i';
 
