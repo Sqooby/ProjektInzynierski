@@ -93,15 +93,44 @@ class _MapWidgetState extends State<MapBody> {
   }
 
   void startMarkerMovement() {
-    const duration = Duration(seconds: 5); // Update this based on how fast you want the marker to move
+    const duration = Duration(seconds: 30); // Update this based on how fast you want the marker to move
     timer = Timer.periodic(duration, (Timer t) {
-      if (currentIndex < polylineCoordinates.length) {
-        updateMarkerPosition(polylineCoordinates[currentIndex]);
-        currentIndex++;
+      if (currentIndex < polylineCoordinates.length - 1) {
+        int nextIndex = currentIndex + 1;
+        LatLng startPosition = polylineCoordinates[currentIndex];
+        LatLng endPosition = polylineCoordinates[nextIndex];
+        List<LatLng> interpolatedPoints = interpolatePoints(startPosition, endPosition);
+        animateMarker(interpolatedPoints, 0);
       } else {
         timer?.cancel(); // Stop the timer when we reach the end
       }
     });
+  }
+
+  List<LatLng> interpolatePoints(LatLng start, LatLng end) {
+    // Determine the number of steps based on the duration and speed
+    int steps = 6; // for example, 5 steps for a 500ms duration
+    List<LatLng> points = [];
+
+    for (int i = 0; i <= steps; i++) {
+      double lat = start.latitude + (end.latitude - start.latitude) * (i / steps);
+      double lng = start.longitude + (end.longitude - start.longitude) * (i / steps);
+      points.add(LatLng(lat, lng));
+    }
+
+    return points;
+  }
+
+  void animateMarker(List<LatLng> points, int index) {
+    if (index < points.length) {
+      updateMarkerPosition(points[index]);
+      Future.delayed(Duration(seconds: 5), () {
+        animateMarker(points, index + 1);
+      });
+    } else {
+      // Increment the current index when finished animating between the points
+      currentIndex++;
+    }
   }
 
   void updateMarkerPosition(LatLng newPosition) {
@@ -122,7 +151,6 @@ class _MapWidgetState extends State<MapBody> {
       // Update the position of the moving marker
       _markers.removeWhere((marker) => marker.markerId.value == 'moving_dot');
       _markers.add(movingMarker);
-      print('Marker updated to postion: $newPosition');
     });
     mapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
       target: newPosition, // The LatLng of the new position
