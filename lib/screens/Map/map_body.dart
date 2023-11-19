@@ -1,4 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:math';
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
@@ -12,6 +12,7 @@ import 'package:pv_analizer/widgets/List_tile_of_course.dart';
 
 class MapBody extends StatefulWidget {
   final List<dynamic>? courseStageMap;
+
   const MapBody({
     Key? key,
     required this.courseStageMap,
@@ -24,11 +25,13 @@ class MapBody extends StatefulWidget {
 class _MapWidgetState extends State<MapBody> {
   bool isLeftAligned = true;
   final String? apiKey = dotenv.env['API_KEY'];
+  List<LatLng> polylineCoordinates = [];
+  Timer? timer;
+  int currentIndex = 0;
 
   final Set<Marker> _markers = {};
 
   GoogleMapController? mapController;
-  final Set<Polyline> _polylines = {};
 
   final List<LatLng> polygonLatLngs = <LatLng>[];
 
@@ -43,83 +46,95 @@ class _MapWidgetState extends State<MapBody> {
     final TextPainter textPainter = TextPainter(
       text: TextSpan(
         text: number.toString(),
-        style: TextStyle(color: Colors.white, fontSize: 50.0, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontSize: 50.0, fontWeight: FontWeight.bold),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
 
-    canvas.drawCircle(Offset(30.0, 30.0), 30.0, paint);
-    textPainter.paint(canvas, Offset(20.0, 20.0));
+    canvas.drawCircle(const Offset(30.0, 30.0), 30.0, paint);
+    textPainter.paint(canvas, const Offset(20.0, 20.0));
 
     final img = await pictureRecorder.endRecording().toImage(60, 60);
     final data = await img.toByteData(format: ImageByteFormat.png);
     return data!.buffer.asUint8List();
   }
 
-  Future<List<LatLng>> getPolylineCoordinates() async {
+  void getPolylineCoordinates() async {
     PolylinePoints polylinePoints = PolylinePoints();
-    List<PointLatLng> result = [];
 
-    for (var i = 0; i < widget.courseStageMap!.length - 1; i++) {
-      PointLatLng currentLocation = PointLatLng(
-          double.parse(widget.courseStageMap![i]['gps_n']), double.parse(widget.courseStageMap![i]['gps_e']));
-      PointLatLng nextLocation = PointLatLng(
-          double.parse(widget.courseStageMap![i + 1]['gps_n']), double.parse(widget.courseStageMap![i + 1]['gps_e']));
-      ;
-
-      PolylineResult polylineResult = await polylinePoints.getRouteBetweenCoordinates(
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
         apiKey!,
-        currentLocation,
-        nextLocation,
-      );
+        PointLatLng(
+            double.parse(widget.courseStageMap!.first['gps_n']), double.parse(widget.courseStageMap!.first['gps_e'])),
+        PointLatLng(
+            double.parse(widget.courseStageMap!.last['gps_n']), double.parse(widget.courseStageMap!.last['gps_e'])));
 
-      if (polylineResult.points.isNotEmpty) {
-        result.addAll(polylineResult.points);
+    int markerInterval = 15;
+    for (int i = 0; i < result.points.length; i++) {
+      if (i % markerInterval == 0) {
+        PointLatLng point = result.points[i];
 
-        setState(() {});
+        LatLng position = LatLng(point.latitude, point.longitude);
+        polylineCoordinates.add(position);
+        Marker marker = Marker(
+          markerId: MarkerId('${point.latitude}_${point.longitude}'),
+          position: position,
+          infoWindow: InfoWindow(
+            title: 'Marker',
+            snippet: '${point.latitude}, ${point.longitude}',
+          ),
+        );
+
+        _markers.add(marker);
       }
     }
 
-    return result.map((point) => LatLng(point.latitude, point.longitude)).toList();
+    setState(() {});
   }
 
-  Future<Set<Marker>> getMarkerCoordinates() async {
-    Set<Marker> markers = {};
-    for (var i = 0; i < widget.courseStageMap!.length; i++) {
-      double gpsN = double.parse(widget.courseStageMap![i]['gps_n']);
-      double gpsE = double.parse(widget.courseStageMap![i]['gps_e']);
-      Uint8List markerIcon = await getMarkerIcon(i + 1);
-      String markerId = 'marker_$i';
-
-      Marker marker = Marker(
-        icon: BitmapDescriptor.fromBytes(markerIcon),
-        markerId: MarkerId(markerId),
-        position: LatLng(gpsN, gpsE),
-      );
-
-      markers.add(marker);
-    }
-    return markers;
+  void startMarkerMovement() {
+    const duration = Duration(seconds: 5); // Update this based on how fast you want the marker to move
+    timer = Timer.periodic(duration, (Timer t) {
+      if (currentIndex < polylineCoordinates.length) {
+        updateMarkerPosition(polylineCoordinates[currentIndex]);
+        currentIndex++;
+      } else {
+        timer?.cancel(); // Stop the timer when we reach the end
+      }
+    });
   }
 
-  void _drawPolyline() async {
-    List<LatLng> polylineCoordinates = await getPolylineCoordinates();
-    Set<Marker> markers = await getMarkerCoordinates();
+  void updateMarkerPosition(LatLng newPosition) {
+    Marker movingMarker = Marker(
+      markerId: MarkerId('moving_dot'),
+      position: newPosition, // New position
+      icon: BitmapDescriptor.defaultMarker,
+
+      // You can customize the marker to be a red dot or any other icon
+    );
 
     setState(() {
-      _polylines.add(Polyline(
-        polylineId: const PolylineId('route'),
-        color: Colors.blue,
-        width: 6,
-        points: polylineCoordinates,
-      ));
-      _markers.addAll(markers);
+      // Update the position of the moving marker
+      _markers.removeWhere((marker) => marker.markerId.value == 'moving_dot');
+      _markers.add(movingMarker);
+      print('Marker updated to postion: $newPosition');
     });
+    mapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+      target: newPosition, // The LatLng of the new position
+      zoom: 14, // Adjust the zoom level as needed
+    )));
   }
 
   @override
   void initState() {
     super.initState();
+    getPolylineCoordinates();
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -136,12 +151,20 @@ class _MapWidgetState extends State<MapBody> {
             child: Stack(
               children: [
                 GoogleMap(
+                    onMapCreated: (GoogleMapController controller) {
+                      mapController = controller;
+                      startMarkerMovement();
+                    },
                     initialCameraPosition: kGooglePlex,
                     mapType: MapType.terrain,
-                    onMapCreated: (GoogleMapController controller) {
-                      _drawPolyline();
+                    polylines: {
+                      Polyline(
+                        polylineId: const PolylineId('route'),
+                        points: polylineCoordinates,
+                        color: Colors.blue,
+                        width: 3,
+                      )
                     },
-                    polylines: _polylines,
                     markers: _markers),
                 GestureDetector(
                   onHorizontalDragEnd: (details) {

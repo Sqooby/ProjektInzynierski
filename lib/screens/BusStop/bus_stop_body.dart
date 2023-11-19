@@ -1,11 +1,16 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
+
 import '../Map/map_body.dart';
 
 class BusStopBody extends StatefulWidget {
   @override
-  final Map<String, List<dynamic>> courseMap;
+  final Map<String, List<dynamic>>? courseMap;
 
-  const BusStopBody({Key? key, required this.courseMap}) : super(key: key);
+  const BusStopBody({
+    Key? key,
+    this.courseMap,
+  }) : super(key: key);
   State<BusStopBody> createState() => _BusStopBodyState();
 }
 
@@ -13,46 +18,49 @@ class _BusStopBodyState extends State<BusStopBody> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(60),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8),
-                child: Text(
-                  widget.courseMap.values.first.first['name'],
-                  style: const TextStyle(fontSize: 24),
+        appBar: widget.courseMap?['1'] == (1)
+            ? AppBar()
+            : AppBar(
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(60),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, bottom: 8, left: 8),
+                        child: Text(
+                          widget.courseMap?.values.first.first['name'],
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          widget.courseMap?.values.first.last['name'],
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  widget.courseMap.values.first.last['name'],
-                  style: const TextStyle(fontSize: 24),
+        body: widget.courseMap?['1'] == (1)
+            ? const Center(child: Text("Nie ma takiego przejazdu"))
+            : Center(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: widget.courseMap?.keys.toList().length,
+                  itemBuilder: ((context, index) {
+                    return Card(child: listTileCourse(context, index));
+                  }),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: Center(
-        child: ListView.builder(
-          padding: const EdgeInsets.all(10),
-          itemCount: 2,
-          itemBuilder: ((context, index) {
-            return Card(child: listTileCourse(context, index));
-          }),
-        ),
-      ),
-    );
+              ));
   }
 
   Widget listTileCourse(BuildContext context, int index) {
-    var keys = widget.courseMap.keys.toList();
-    var val = widget.courseMap[keys[index]];
+    var keys = widget.courseMap?.keys.toList();
+    var val = widget.courseMap?[keys?[index]];
 
     return ListTile(
       onTap: () {
@@ -61,7 +69,7 @@ class _BusStopBodyState extends State<BusStopBody> {
           context,
           MaterialPageRoute(
               builder: (context) => MapBody(
-                    courseStageMap: widget.courseMap[keys[index]],
+                    courseStageMap: widget.courseMap?[keys?[index]],
                   )),
         );
       },
@@ -72,7 +80,7 @@ class _BusStopBodyState extends State<BusStopBody> {
           margin: const EdgeInsets.all(5),
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(widget.courseMap['80']![0]['id_course'].toString()),
+            child: Text(val!.first['id_course'].toString()),
           ),
         )
       ]),

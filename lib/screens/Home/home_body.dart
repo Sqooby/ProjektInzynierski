@@ -124,7 +124,6 @@ class _HomeWidgetState extends State<HomeWidget> {
               widget.originController.text = widget.predictionsOriginList[index];
 
               final place = await ls.getPlace(widget.originController.text);
-              print(place);
 
               widget.originLat = place['geometry']['location']['lat'];
               widget.originLng = place['geometry']['location']['lng'];
@@ -216,6 +215,11 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     int firstIndex = -1;
     int lastIndex = -1;
+    String orgStopName = widget.orgDesBusStop[0].name; // Assuming orgDesBusStop is a List of BusStop
+    String dstStopName = widget.orgDesBusStop[1].name;
+    print(orgStopName);
+    print(dstStopName);
+
     for (var i in [79, 80, 81]) {
       final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(i);
       final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(i);
@@ -223,13 +227,19 @@ class _HomeWidgetState extends State<HomeWidget> {
       int index = 0;
       List<dynamic> courseList = [];
       final Set<String> uniqueNames = {};
+      bool orgStopFound = false;
+      bool dstStopFound = false;
       for (var x = 0; x < busStopbyId.length; x++) {
-        if (widget.orgDesBusStop[0].name == busStopbyId[x].first.name ||
-            widget.orgDesBusStop[1].name == busStopbyId[x].first.name) {
-          index = x;
+        String name = busStopbyId[x].first.name;
+
+        if (name == orgStopName) {
+          // Found the org stop, start recording stops
           checked = true;
-          String name = busStopbyId[x].first.name;
+          index = x;
+          orgStopFound = true;
+        }
 
+        if (checked) {
           if (!uniqueNames.contains(name)) {
             if (firstIndex == -1) {
               // Store the index of the first occurrence of the name
@@ -248,41 +258,107 @@ class _HomeWidgetState extends State<HomeWidget> {
             courseList.add(course);
 
             uniqueNames.add(name);
-          }
-        } else if (checked) {
-          String name = busStopbyId[x].first.name;
-          if (!uniqueNames.contains(name)) {
-            if (firstIndex == -1) {
-              // Store the index of the first occurrence of the name
-              firstIndex = x;
+
+            if (name == dstStopName) {
+              // Found the dst stop, stop recording stops
+              checked = false;
+              dstStopFound = true;
+
+              break;
             }
-            // Store the index of the last occurrence of the name
-            lastIndex = x;
-            Map<String, dynamic> course = {
-              'stage': courseStageById[x].stage.toString(),
-              'name': name,
-              'gps_n': busStopbyId[x].first.gpsN,
-              'gps_e': busStopbyId[x].first.gpsE,
-              'id_course': i
-            };
-
-            courseList.add(course);
-
-            uniqueNames.add(name);
           }
         }
       }
-      if (courseList.length < 2) {
-        courseList = [];
-      } else {
+
+      if (courseList.length >= 2 && dstStopFound && orgStopFound) {
         courseMap['$i'] = courseList;
+      } else {
+        courseList = [];
+      }
+      if (courseMap.isEmpty) {
+        courseMap['1'] = ['1'];
       }
     }
-    print('79');
-    print(courseMap['79']);
-    print('80');
-    print(courseMap['80']);
+
+    print(courseMap['1']);
+    print(courseMap.keys);
 
     return courseMap;
   }
+
+  // Future<Map<String, List<dynamic>>> gettingMapBusStopNameAndStage() async {
+  //   final Map<String, List<dynamic>> courseMap = {};
+
+  //   int firstIndex = -1;
+  //   int lastIndex = -1;
+  //   for (var i in [79, 80, 81]) {
+  //     final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(i);
+  //     final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(i);
+  //     bool checked = false;
+  //     int index = 0;
+  //     List<dynamic> courseList = [];
+  //     final Set<String> uniqueNames = {};
+
+  //     for (var x = 0; x < busStopbyId.length; x++) {
+  //       if (widget.orgDesBusStop[0].name == busStopbyId[x].first.name ||
+  //           widget.orgDesBusStop[1].name == busStopbyId[x].first.name) {
+  //         index = x;
+  //         checked = true;
+  //         String name = busStopbyId[x].first.name;
+
+  //         if (!uniqueNames.contains(name)) {
+  //           if (firstIndex == -1) {
+  //             // Store the index of the first occurrence of the name
+  //             firstIndex = x;
+  //           }
+  //           // Store the index of the last occurrence of the name
+  //           lastIndex = x;
+  //           Map<String, dynamic> course = {
+  //             'stage': courseStageById[x].stage.toString(),
+  //             'name': name,
+  //             'gps_n': busStopbyId[x].first.gpsN,
+  //             'gps_e': busStopbyId[x].first.gpsE,
+  //             'id_course': i
+  //           };
+
+  //           courseList.add(course);
+
+  //           uniqueNames.add(name);
+  //         }
+  //       } else if (checked) {
+  //         String name = busStopbyId[x].first.name;
+  //         if (!uniqueNames.contains(name)) {
+  //           if (firstIndex == -1) {
+  //             // Store the index of the first occurrence of the name
+  //             firstIndex = x;
+  //           }
+  //           // Store the index of the last occurrence of the name
+  //           lastIndex = x;
+  //           Map<String, dynamic> course = {
+  //             'stage': courseStageById[x].stage.toString(),
+  //             'name': name,
+  //             'gps_n': busStopbyId[x].first.gpsN,
+  //             'gps_e': busStopbyId[x].first.gpsE,
+  //             'id_course': i
+  //           };
+
+  //           courseList.add(course);
+
+  //           uniqueNames.add(name);
+  //         }
+  //       }
+  //     }
+  //     if (courseList.length < 2) {
+  //       courseList = [];
+  //     } else {
+  //       courseMap['$i'] = courseList;
+  //     }
+  //   }
+  //   print('79');
+  //   print(courseMap['79']);
+  //   print('80');
+  //   print(courseMap['80']);
+
+  //   return courseMap;
+  // }
 }
