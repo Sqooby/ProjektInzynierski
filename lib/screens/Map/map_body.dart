@@ -106,12 +106,17 @@ class _MapWidgetState extends State<MapBody> {
 
   void updateMarkerPosition(LatLng newPosition) {
     Marker movingMarker = Marker(
-      markerId: MarkerId('moving_dot'),
-      position: newPosition, // New position
-      icon: BitmapDescriptor.defaultMarker,
+        markerId: MarkerId('moving_dot'),
+        position: newPosition, // New position
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: const InfoWindow(
+          title: 'Bus 123',
+          snippet: 'Next stop: Central Station',
+        ),
+        zIndex: 2
 
-      // You can customize the marker to be a red dot or any other icon
-    );
+        // You can customize the marker to be a red dot or any other icon
+        );
 
     setState(() {
       // Update the position of the moving marker
