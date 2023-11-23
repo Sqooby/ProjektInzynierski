@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:pv_analizer/screens/AboutMe/about_me_screen.dart';
 
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/screens/Login/login_screen.dart';
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
           '/profile': (context) => ProfileScreen(),
           '/sing_up': (context) => SingUpScreen(),
           '/home': (context) => HomeScreen(),
+          '/about_me': (context) => AboutMeScreen(),
         },
       ),
     );

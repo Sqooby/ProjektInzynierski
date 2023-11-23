@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pv_analizer/screens/AboutMe/about_me_screen.dart';
 import 'package:pv_analizer/screens/Home/home_screen.dart';
 import 'package:pv_analizer/screens/profile/profile_screen.dart';
-
-import '../screens/Map/map_screen.dart';
 
 import '../screens/Login/login_screen.dart';
 
@@ -74,6 +73,13 @@ class HomeDrawer extends StatelessWidget {
               Icons.logout,
               () {
                 Navigator.of(context).pushReplacementNamed(LoginScreen.routeName);
+              },
+            ),
+            ItemDrawer(
+              "About Me",
+              Icons.person,
+              () {
+                Navigator.of(context).pushReplacementNamed(AboutMeScreen.routeName);
               },
             ),
           ],
