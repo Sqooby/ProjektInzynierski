@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pv_analizer/screens/Home/home_screen.dart';
 import 'package:pv_analizer/screens/profile/profile_screen.dart';
 
 import '../screens/Map/map_screen.dart';
@@ -58,7 +59,7 @@ class HomeDrawer extends StatelessWidget {
               'Home',
               Icons.home,
               () {
-                Navigator.of(context).pushReplacementNamed(MapScreen.routeName);
+                Navigator.of(context).pushReplacementNamed(HomeScreen.routeName);
               },
             ),
             ItemDrawer(

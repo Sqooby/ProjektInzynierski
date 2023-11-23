@@ -173,9 +173,7 @@ class _SingUpScreenState extends State<SingUpScreen> {
                                             const SnackBar(content: Text('Pomyślne zarejestrowanie')),
                                           );
                                           Navigator.of(context).pop();
-                                        } else {
-                                          print('$_formKey');
-                                        }
+                                        } else {}
                                       },
                                     ),
                                   ),

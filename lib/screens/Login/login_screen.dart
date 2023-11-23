@@ -6,6 +6,7 @@ import 'package:pv_analizer/screens/Login/cubit/user_cubit.dart';
 
 import 'package:pv_analizer/screens/Home/home_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../widgets/login_wigdet.dart';
 import '../SingUp/sing_up_screen.dart';
@@ -23,7 +24,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController mailController = TextEditingController();
 
   final TextEditingController passwordController = TextEditingController();
-  late String id;
 
   @override
   void initState() {
@@ -32,6 +32,11 @@ class _LoginScreenState extends State<LoginScreen> {
       final cubit = context.read<UserCubit>();
       cubit.fetchUser();
     });
+  }
+
+  addIdToSf(int id) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('id', id);
   }
 
   @override
@@ -102,8 +107,14 @@ class _LoginScreenState extends State<LoginScreen> {
                           alignment: Alignment.center,
                           child: TextButton(
                             onPressed: () async {
-                              var result = state.users.any((element) =>
-                                  element.email == mailController.text && element.password == passwordController.text);
+                              bool result = false;
+                              for (var x in state.users) {
+                                if (x.email == mailController.text && x.password == passwordController.text) {
+                                  result = true;
+
+                                  addIdToSf(x.idUser);
+                                }
+                              }
 
                               if (result) {
                                 Navigator.push(
