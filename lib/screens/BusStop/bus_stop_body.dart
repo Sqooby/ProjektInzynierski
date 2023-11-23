@@ -64,7 +64,6 @@ class _BusStopBodyState extends State<BusStopBody> {
 
     return ListTile(
       onTap: () {
-        print(val);
         Navigator.push(
           context,
           MaterialPageRoute(

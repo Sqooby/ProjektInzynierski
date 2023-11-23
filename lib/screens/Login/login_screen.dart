@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController mailController = TextEditingController();
 
   final TextEditingController passwordController = TextEditingController();
+  late String id;
 
   @override
   void initState() {
@@ -103,6 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () async {
                               var result = state.users.any((element) =>
                                   element.email == mailController.text && element.password == passwordController.text);
+
                               if (result) {
                                 Navigator.push(
                                   context,
