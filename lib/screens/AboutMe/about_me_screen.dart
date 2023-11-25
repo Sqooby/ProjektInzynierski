@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:pv_analizer/widgets/home_drawer.dart';
 
 class AboutMeScreen extends StatelessWidget {
   static String routeName = '/about_me';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: HomeDrawer(),
       appBar: AppBar(
         title: const Text('O Projekcie'),
       ),
