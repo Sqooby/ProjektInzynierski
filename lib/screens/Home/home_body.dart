@@ -31,6 +31,7 @@ class HomeWidget extends StatefulWidget {
   List<String> predictionsDestinationList = [];
   List<BusStop> busStopList = [];
   List<BusStop> orgDesBusStop = [];
+  TimeOfDay selectedTime = TimeOfDay.now();
 }
 
 final LocationService ls = LocationService();
@@ -78,6 +79,26 @@ class _HomeWidgetState extends State<HomeWidget> {
                             });
                           },
                         ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text('${widget.selectedTime.hour}:${widget.selectedTime.minute}'),
+                            ElevatedButton(
+                              child: const Text('Choose Time'),
+                              onPressed: () async {
+                                final TimeOfDay? timeOfDay = await showTimePicker(
+                                    context: context,
+                                    initialTime: widget.selectedTime,
+                                    initialEntryMode: TimePickerEntryMode.dial);
+                                if (timeOfDay != null) {
+                                  setState(() {
+                                    widget.selectedTime = timeOfDay;
+                                  });
+                                }
+                              },
+                            )
+                          ],
+                        ),
                         IconButton(
                           onPressed: () async {
                             widget.orgDesBusStop = await gettingNearestBusStop(
@@ -110,6 +131,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               ),
               widget.predictionsOriginList.isNotEmpty ? originLocationListView() : const SizedBox(),
               widget.predictionsDestinationList.isNotEmpty ? destinationLocationListView() : const SizedBox(),
+              const SizedBox(height: 100),
             ],
           );
         }
@@ -282,80 +304,4 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     return courseMap;
   }
-
-  // Future<Map<String, List<dynamic>>> gettingMapBusStopNameAndStage() async {
-  //   final Map<String, List<dynamic>> courseMap = {};
-
-  //   int firstIndex = -1;
-  //   int lastIndex = -1;
-  //   for (var i in [79, 80, 81]) {
-  //     final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(i);
-  //     final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(i);
-  //     bool checked = false;
-  //     int index = 0;
-  //     List<dynamic> courseList = [];
-  //     final Set<String> uniqueNames = {};
-
-  //     for (var x = 0; x < busStopbyId.length; x++) {
-  //       if (widget.orgDesBusStop[0].name == busStopbyId[x].first.name ||
-  //           widget.orgDesBusStop[1].name == busStopbyId[x].first.name) {
-  //         index = x;
-  //         checked = true;
-  //         String name = busStopbyId[x].first.name;
-
-  //         if (!uniqueNames.contains(name)) {
-  //           if (firstIndex == -1) {
-  //             // Store the index of the first occurrence of the name
-  //             firstIndex = x;
-  //           }
-  //           // Store the index of the last occurrence of the name
-  //           lastIndex = x;
-  //           Map<String, dynamic> course = {
-  //             'stage': courseStageById[x].stage.toString(),
-  //             'name': name,
-  //             'gps_n': busStopbyId[x].first.gpsN,
-  //             'gps_e': busStopbyId[x].first.gpsE,
-  //             'id_course': i
-  //           };
-
-  //           courseList.add(course);
-
-  //           uniqueNames.add(name);
-  //         }
-  //       } else if (checked) {
-  //         String name = busStopbyId[x].first.name;
-  //         if (!uniqueNames.contains(name)) {
-  //           if (firstIndex == -1) {
-  //             // Store the index of the first occurrence of the name
-  //             firstIndex = x;
-  //           }
-  //           // Store the index of the last occurrence of the name
-  //           lastIndex = x;
-  //           Map<String, dynamic> course = {
-  //             'stage': courseStageById[x].stage.toString(),
-  //             'name': name,
-  //             'gps_n': busStopbyId[x].first.gpsN,
-  //             'gps_e': busStopbyId[x].first.gpsE,
-  //             'id_course': i
-  //           };
-
-  //           courseList.add(course);
-
-  //           uniqueNames.add(name);
-  //         }
-  //       }
-  //     }
-  //     if (courseList.length < 2) {
-  //       courseList = [];
-  //     } else {
-  //       courseMap['$i'] = courseList;
-  //     }
-  //   }
-  //   print('79');
-  //   print(courseMap['79']);
-  //   print('80');
-  //   print(courseMap['80']);
-
-  //   return courseMap;
-  // }
 }
