@@ -24,8 +24,6 @@ class DataManager {
   }
 
   Future<List<CourseStageList>> courseStageByidCourse(int idCourseStage) async {
-    final busStop = await _busStopRepo.getBusStop();
-
     final courseStage = await _courseStageRepo.getCourseStage();
     final courseStageByIdCourse = courseStage.where((e) => e.id_course == idCourseStage).map((course) {
       return course;
@@ -34,9 +32,9 @@ class DataManager {
   }
 
   Future<User> userById(int id) async {
-    final Users = await _userRepo.getUser();
-    final User user = Users.firstWhere((element) => element.idUser == id);
-    print(user.email);
+    final users = await _userRepo.getUser();
+    final User user = users.firstWhere((element) => element.idUser == id);
+
     return user;
   }
 }

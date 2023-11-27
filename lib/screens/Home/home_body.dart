@@ -84,11 +84,15 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 widget.originLat, widget.originLng, widget.destinationLat, widget.destinationLng);
                             final courseMap = await gettingMapBusStopNameAndStage();
 
+                            var keys = courseMap.keys.toList();
+                            var val = courseMap[keys[0]];
+                            ls.getDirections(widget.originController.text, widget.destinationController.text);
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => BusStopScreen(
-                                        courseMap: courseMap,
+                                  builder: (context) => MapBody(
+                                        courseStageMap: val,
                                       )),
                             );
                           },
@@ -217,71 +221,64 @@ class _HomeWidgetState extends State<HomeWidget> {
     int lastIndex = -1;
     String orgStopName = widget.orgDesBusStop[0].name; // Assuming orgDesBusStop is a List of BusStop
     String dstStopName = widget.orgDesBusStop[1].name;
-    print(orgStopName);
-    print(dstStopName);
 
-    for (var i in [79, 80, 81]) {
-      final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(i);
-      final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(i);
-      bool checked = false;
-      int index = 0;
-      List<dynamic> courseList = [];
-      final Set<String> uniqueNames = {};
-      bool orgStopFound = false;
-      bool dstStopFound = false;
-      for (var x = 0; x < busStopbyId.length; x++) {
-        String name = busStopbyId[x].first.name;
+    final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(79);
+    final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(79);
+    bool checked = false;
+    int index = 0;
+    List<dynamic> courseList = [];
+    final Set<String> uniqueNames = {};
+    bool orgStopFound = false;
+    bool dstStopFound = false;
+    for (var x = 0; x < busStopbyId.length; x++) {
+      String name = busStopbyId[x].first.name;
 
-        if (name == orgStopName) {
-          // Found the org stop, start recording stops
-          checked = true;
-          index = x;
-          orgStopFound = true;
-        }
+      if (name == orgStopName) {
+        // Found the org stop, start recording stops
+        checked = true;
+        index = x;
+        orgStopFound = true;
+      }
 
-        if (checked) {
-          if (!uniqueNames.contains(name)) {
-            if (firstIndex == -1) {
-              // Store the index of the first occurrence of the name
-              firstIndex = x;
-            }
-            // Store the index of the last occurrence of the name
-            lastIndex = x;
-            Map<String, dynamic> course = {
-              'stage': courseStageById[x].stage.toString(),
-              'name': name,
-              'gps_n': busStopbyId[x].first.gpsN,
-              'gps_e': busStopbyId[x].first.gpsE,
-              'id_course': i
-            };
+      if (checked) {
+        if (!uniqueNames.contains(name)) {
+          if (firstIndex == -1) {
+            // Store the index of the first occurrence of the name
+            firstIndex = x;
+          }
+          // Store the index of the last occurrence of the name
+          lastIndex = x;
+          Map<String, dynamic> course = {
+            'stage': courseStageById[x].stage.toString(),
+            'name': name,
+            'gps_n': busStopbyId[x].first.gpsN,
+            'gps_e': busStopbyId[x].first.gpsE,
+            'id_course': 79
+          };
 
-            courseList.add(course);
+          courseList.add(course);
 
-            uniqueNames.add(name);
+          uniqueNames.add(name);
 
-            if (name == dstStopName) {
-              // Found the dst stop, stop recording stops
-              checked = false;
-              dstStopFound = true;
+          if (name == dstStopName) {
+            // Found the dst stop, stop recording stops
+            checked = false;
+            dstStopFound = true;
 
-              break;
-            }
+            break;
           }
         }
       }
-
-      if (courseList.length >= 2 && dstStopFound && orgStopFound) {
-        courseMap['$i'] = courseList;
-      } else {
-        courseList = [];
-      }
-      if (courseMap.isEmpty) {
-        courseMap['1'] = ['1'];
-      }
     }
 
-    print(courseMap['1']);
-    print(courseMap.keys);
+    if (courseList.length >= 2 && dstStopFound && orgStopFound) {
+      courseMap['79'] = courseList;
+    } else {
+      courseList = [];
+    }
+    if (courseMap.isEmpty) {
+      courseMap['1'] = ['1'];
+    }
 
     return courseMap;
   }

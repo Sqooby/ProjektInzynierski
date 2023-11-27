@@ -1,7 +1,5 @@
 import 'dart:math';
 import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,7 +80,7 @@ class _MapWidgetState extends State<MapBody> {
               for (var point in result.points) {
                 LatLng position = LatLng(point.latitude, point.longitude);
 
-                var distance = calculateDistance(
+                double distance = calculateDistance(
                     double.parse(busStop.gpsN), double.parse(busStop.gpsE), point.latitude, point.longitude);
 
                 if (distance <= radius) {
@@ -106,8 +104,9 @@ class _MapWidgetState extends State<MapBody> {
 
           List<LatLng> interpolatePoints(LatLng start, LatLng end) {
             // Determine the number of steps based on the duration and speed
-            int steps = 5; // for example, 5 steps for a 500ms duration
+
             List<LatLng> points = [];
+            int steps = 5;
 
             for (int i = 0; i <= steps; i++) {
               double lat = start.latitude + (end.latitude - start.latitude) * (i / steps);
@@ -120,7 +119,7 @@ class _MapWidgetState extends State<MapBody> {
 
           void updateMarkerPosition(LatLng newPosition) {
             Marker movingMarker = Marker(
-                markerId: MarkerId('moving_dot'),
+                markerId: const MarkerId('moving_dot'),
                 position: newPosition, // New position
                 icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
                 infoWindow: const InfoWindow(
@@ -146,7 +145,7 @@ class _MapWidgetState extends State<MapBody> {
           void animateMarker(List<LatLng> points, int index) {
             if (index < points.length) {
               updateMarkerPosition(points[index]);
-              Future.delayed(const Duration(seconds: 5), () {
+              Future.delayed(const Duration(seconds: 1), () {
                 animateMarker(points, index + 1);
               });
             } else {
@@ -156,12 +155,13 @@ class _MapWidgetState extends State<MapBody> {
           }
 
           void startMarkerMovement() {
-            const duration = Duration(seconds: 5); // Update this based on how fast you want the marker to move
+            const duration = Duration(seconds: 10); // Update this based on how fast you want the marker to move
             timer = Timer.periodic(duration, (Timer t) {
               if (currentIndex < polylineCoordinates.length - 1) {
                 int nextIndex = currentIndex + 1;
                 LatLng startPosition = polylineCoordinates[currentIndex];
                 LatLng endPosition = polylineCoordinates[nextIndex];
+
                 List<LatLng> interpolatedPoints = interpolatePoints(startPosition, endPosition);
                 animateMarker(interpolatedPoints, 0);
               } else {

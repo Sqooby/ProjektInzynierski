@@ -9,6 +9,7 @@ import 'package:pv_analizer/repositories/bus_stop_repo.dart';
 
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:pv_analizer/screens/Home/home_screen.dart';
+import 'package:pv_analizer/screens/Map/map_screen.dart';
 
 import 'package:pv_analizer/screens/SingUp/sing_up_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
