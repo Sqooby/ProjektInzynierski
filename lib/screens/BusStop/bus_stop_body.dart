@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import '../Map/map_body.dart';
 
 class BusStopBody extends StatefulWidget {
-  @override
   final Map<String, List<dynamic>>? courseMap;
 
   const BusStopBody({
     Key? key,
     this.courseMap,
   }) : super(key: key);
+  @override
   State<BusStopBody> createState() => _BusStopBodyState();
 }
 
@@ -22,7 +22,7 @@ class _BusStopBodyState extends State<BusStopBody> {
             ? AppBar()
             : AppBar(
                 bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(60),
+                  preferredSize: const Size.fromHeight(60),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,

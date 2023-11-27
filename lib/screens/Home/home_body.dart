@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pv_analizer/DataManager/data_manager.dart';
@@ -7,7 +5,6 @@ import 'package:pv_analizer/models/busStop.dart';
 import 'package:pv_analizer/models/course_stage_list.dart';
 import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:pv_analizer/screens/BusStop/bus_stop_screen.dart';
 
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/screens/Map/map_body.dart';
@@ -211,7 +208,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     List<BusStop> BusStops = [];
 
-    widget.busStopList.forEach((busStop) {
+    for (var busStop in widget.busStopList) {
       busStopLatOrg = double.parse(busStop.gpsN);
       busStopLngOrg = double.parse(busStop.gpsE);
       busStopLatDst = double.parse(busStop.gpsN);
@@ -229,7 +226,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         nearestDistanceToDestination = possibleNearestDistanceToDestination;
         nearestDstBusStop = busStop;
       }
-    });
+    }
     BusStops.add(nearestOrgBusStop!);
     BusStops.add(nearestDstBusStop!);
 
@@ -240,14 +237,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     final Map<String, List<dynamic>> courseMap = {};
 
     int firstIndex = -1;
-    int lastIndex = -1;
     String orgStopName = widget.orgDesBusStop[0].name; // Assuming orgDesBusStop is a List of BusStop
     String dstStopName = widget.orgDesBusStop[1].name;
 
     final List<Iterable<BusStop>> busStopbyId = await widget.dm.busStopByIdCourseStage(79);
     final List<CourseStageList> courseStageById = await widget.dm.courseStageByidCourse(79);
     bool checked = false;
-    int index = 0;
     List<dynamic> courseList = [];
     final Set<String> uniqueNames = {};
     bool orgStopFound = false;
@@ -258,7 +253,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       if (name == orgStopName) {
         // Found the org stop, start recording stops
         checked = true;
-        index = x;
         orgStopFound = true;
       }
 
@@ -269,7 +263,6 @@ class _HomeWidgetState extends State<HomeWidget> {
             firstIndex = x;
           }
           // Store the index of the last occurrence of the name
-          lastIndex = x;
           Map<String, dynamic> course = {
             'stage': courseStageById[x].stage.toString(),
             'name': name,
