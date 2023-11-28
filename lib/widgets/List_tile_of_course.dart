@@ -1,53 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class ListTileOfCourse extends StatelessWidget {
-  const ListTileOfCourse({Key? key}) : super(key: key);
+class ListTileOfCourse extends StatefulWidget {
+  const ListTileOfCourse({
+    Key? key,
+    required this.startedTime,
+  }) : super(key: key);
+  final TimeOfDay? startedTime;
 
   @override
+  State<ListTileOfCourse> createState() => _ListTileOfCourseState();
+}
+
+class _ListTileOfCourseState extends State<ListTileOfCourse> {
+  @override
   Widget build(BuildContext context) {
+    // Or any other loading indicator
+
     return SizedBox(
-      height: MediaQuery.sizeOf(context).height * 0.11,
-      child: const ListTile(
+      height: MediaQuery.sizeOf(context).height * 0.05,
+      child: ListTile(
         style: ListTileStyle.drawer,
-        title: Row(children: [
-          Icon(Icons.bus_alert_rounded),
-          Card(
-            margin: EdgeInsets.all(5),
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text("Number"),
-            ),
-          )
-        ]),
-        leading: Padding(
-          padding: EdgeInsets.only(right: 10.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [Text('odjazd za:'), Text("czas")],
-          ),
-        ),
-        subtitle: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Row(
-            children: [
-              Icon(Icons.nordic_walking),
-              Text('8 min'),
-            ],
-          ),
-          Card(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text('8:20'),
-            ),
-          ),
-          Text('8 min'),
-          Card(
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text('8:40'),
-            ),
-          ),
-        ]),
-        trailing: Text("14 min"),
+        leading: const Text('odjazd o godz:'),
+        title: Text('${widget.startedTime!.hour}:${widget.startedTime!.minute}'),
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/models/busStop.dart';
 
 import 'package:pv_analizer/widgets/List_tile_of_course.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MapBody extends StatefulWidget {
   final List<dynamic>? courseStageMap;
@@ -30,6 +31,7 @@ class _MapWidgetState extends State<MapBody> {
   List<LatLng> polylineCoordinates = [];
   Timer? timer;
   int currentIndex = 0;
+  TimeOfDay? startedTime;
 
   final Set<Marker> _markers = {};
 
@@ -171,111 +173,82 @@ class _MapWidgetState extends State<MapBody> {
           }
 
           @override
+          @override
           void dispose() {
             timer?.cancel();
             super.dispose();
           }
 
-          return Scaffold(
-            appBar: AppBar(),
-            body: Column(
-              children: [
-                const ListTileOfCourse(),
-                SizedBox(
-                  height: MediaQuery.sizeOf(context).height -
-                      AppBar().preferredSize.height -
-                      MediaQuery.sizeOf(context).height * 0.16,
-                  child: Stack(
-                    children: [
-                      GoogleMap(
-                          onMapCreated: (GoogleMapController controller) {
-                            mapController = controller;
-                            getPolylineCoordinates();
-                            startMarkerMovement();
-                          },
-                          initialCameraPosition: kGooglePlex,
-                          mapType: MapType.terrain,
-                          polylines: {
-                            Polyline(
-                              polylineId: const PolylineId('route'),
-                              points: polylineCoordinates,
-                              color: Colors.blue,
-                              width: 3,
-                            )
-                          },
-                          markers: _markers),
-                      GestureDetector(
-                        onHorizontalDragEnd: (details) {
-                          if (details.primaryVelocity! > 0) {
-                            setState(() {
-                              isLeftAligned = true;
-                            });
-                          } else if (details.primaryVelocity! < 0) {
-                            setState(() {
-                              isLeftAligned = false;
-                            });
-                          }
-                        },
-                        child: Align(
-                            alignment: Alignment.centerRight,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 300),
-                              width: isLeftAligned
-                                  ? MediaQuery.sizeOf(context).width * 0.25
-                                  : MediaQuery.sizeOf(context).width * 0.7,
-                              color: Colors.white,
-                              child: const Column(
-                                children: [
-                                  Card(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('godz'),
-                                    ),
-                                  ),
-                                  Divider(
-                                    thickness: 1,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Icon(Icons.nordic_walking),
-                                  ),
-                                  Divider(thickness: 1),
-                                  Card(
-                                    margin: EdgeInsets.only(bottom: 10),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('godz'),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.bus_alert),
-                                        Card(
-                                          child: Text('nr'),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Card(
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Text('kon'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )),
-                      ),
-                    ],
+          Future<TimeOfDay> getSelectedTime() async {
+            final prefs = await SharedPreferences.getInstance();
+
+            String timeString = prefs.getString('selected_time') ?? "00:00";
+            List<String> parts = timeString.split(':');
+            return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+          }
+
+          void loadSelectedTime() async {
+            TimeOfDay time = await getSelectedTime();
+            setState(() {
+              startedTime = time;
+            });
+          }
+
+          return FutureBuilder<TimeOfDay>(
+            future: getSelectedTime(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                startedTime = snapshot.data!;
+                return WillPopScope(
+                  onWillPop: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    print(prefs.getString('selected_time'));
+
+                    prefs.remove('selected_time');
+                    return true;
+                  },
+                  child: Scaffold(
+                    appBar: AppBar(),
+                    body: Column(
+                      children: [
+                        ListTileOfCourse(startedTime: startedTime),
+                        ElevatedButton(onPressed: () {}, child: const Text('Sledz przejazd')),
+                        SizedBox(
+                          height: MediaQuery.sizeOf(context).height -
+                              AppBar().preferredSize.height -
+                              MediaQuery.sizeOf(context).height * 0.16,
+                          child: Stack(
+                            children: [
+                              GoogleMap(
+                                  onMapCreated: (GoogleMapController controller) {
+                                    mapController = controller;
+                                    getPolylineCoordinates();
+                                    startMarkerMovement();
+                                  },
+                                  initialCameraPosition: kGooglePlex,
+                                  mapType: MapType.terrain,
+                                  polylines: {
+                                    Polyline(
+                                      polylineId: const PolylineId('route'),
+                                      points: polylineCoordinates,
+                                      color: Colors.blue,
+                                      width: 3,
+                                    )
+                                  },
+                                  markers: _markers),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                )
-              ],
-            ),
+                );
+              }
+              return Container();
+            },
           );
         }
+
         return Container();
       },
     );

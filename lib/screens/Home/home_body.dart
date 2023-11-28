@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/screens/Map/map_body.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
 class HomeWidget extends StatefulWidget {
@@ -91,6 +92,8 @@ class _HomeWidgetState extends State<HomeWidget> {
                                   setState(() {
                                     widget.selectedTime = timeOfDay;
                                   });
+                                  print(widget.selectedTime);
+                                  await _saveSelectedTime();
                                 }
                               },
                             )
@@ -193,6 +196,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
+  Future<void> _saveSelectedTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    String timeString = "${widget.selectedTime.hour}:${widget.selectedTime.minute}";
+    await prefs.setString('selected_time', timeString);
+  }
+
   Future<List<BusStop>> gettingNearestBusStop(double oriLat, double oriLng, double dstLat, double dstLng) async {
     double nearestDistanceToOrigin = 1000;
     double possibleNearestDistanceToOrigin;
@@ -285,7 +294,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         }
       }
     }
-
     if (courseList.length >= 2 && dstStopFound && orgStopFound) {
       courseMap['79'] = courseList;
     } else {
