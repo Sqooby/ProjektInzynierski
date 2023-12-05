@@ -1,7 +1,5 @@
 import 'package:bloc/bloc.dart';
 
-import 'package:geolocator/geolocator.dart';
-
 import 'package:meta/meta.dart';
 import 'package:pv_analizer/models/busStop.dart';
 import 'package:pv_analizer/repositories/bus_stop_repo.dart';

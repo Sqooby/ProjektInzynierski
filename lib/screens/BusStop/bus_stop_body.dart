@@ -63,15 +63,7 @@ class _BusStopBodyState extends State<BusStopBody> {
     var val = widget.courseMap?[keys?[index]];
 
     return ListTile(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MapBody(
-                    courseStageMap: widget.courseMap?[keys?[index]],
-                  )),
-        );
-      },
+      onTap: () {},
       style: ListTileStyle.drawer,
       title: Row(children: [
         const Icon(Icons.bus_alert_rounded),

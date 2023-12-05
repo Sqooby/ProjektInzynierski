@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pv_analizer/DataManager/data_manager.dart';
@@ -29,6 +31,7 @@ class HomeWidget extends StatefulWidget {
   List<String> predictionsDestinationList = [];
   List<BusStop> busStopList = [];
   List<BusStop> orgDesBusStop = [];
+  List<Map<String, dynamic>> activeRoutes = [];
   TimeOfDay selectedTime = TimeOfDay.now();
 }
 
@@ -92,8 +95,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                                   setState(() {
                                     widget.selectedTime = timeOfDay;
                                   });
-                                  print(widget.selectedTime);
-                                  await _saveSelectedTime();
                                 }
                               },
                             )
@@ -112,9 +113,29 @@ class _HomeWidgetState extends State<HomeWidget> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => MapBody(
-                                        courseStageMap: val,
-                                      )),
+                                builder: (context) => MapBody(
+                                  startedTime: widget.selectedTime,
+                                  courseStageMap: val,
+                                  onButtonPressed: () {
+                                    var newRoute = {
+                                      'origin': widget.originController.text,
+                                      'destination': widget.destinationController.text,
+                                      'time': widget.selectedTime.format(context) // format TimeOfDay to String
+                                    };
+                                    bool existingRoute = widget.activeRoutes.any((route) =>
+                                        route['origin'] == newRoute['origin'] &&
+                                        route['destination'] == newRoute['destination'] &&
+                                        route['time'] == newRoute['time']);
+
+                                    if (!existingRoute) {
+                                      setState(() {
+                                        widget.activeRoutes.add(newRoute);
+                                      });
+                                      print(widget.activeRoutes);
+                                    }
+                                  },
+                                ),
+                              ),
                             );
                           },
                           icon: const Icon(
@@ -132,6 +153,19 @@ class _HomeWidgetState extends State<HomeWidget> {
               widget.predictionsOriginList.isNotEmpty ? originLocationListView() : const SizedBox(),
               widget.predictionsDestinationList.isNotEmpty ? destinationLocationListView() : const SizedBox(),
               const SizedBox(height: 100),
+              widget.activeRoutes.isNotEmpty
+                  ? Container(
+                      height: 60,
+                      child: ListView.builder(
+                        itemCount: widget.activeRoutes.length,
+                        itemBuilder: (context, index) {
+                          print(widget.activeRoutes[index]['origin']);
+                          return ListView(
+                            children: [Text(widget.activeRoutes[index].values.firstOrNull)],
+                          );
+                        },
+                      ))
+                  : const SizedBox()
             ],
           );
         }
@@ -194,12 +228,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         },
       ),
     );
-  }
-
-  Future<void> _saveSelectedTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    String timeString = "${widget.selectedTime.hour}:${widget.selectedTime.minute}";
-    await prefs.setString('selected_time', timeString);
   }
 
   Future<List<BusStop>> gettingNearestBusStop(double oriLat, double oriLng, double dstLat, double dstLng) async {

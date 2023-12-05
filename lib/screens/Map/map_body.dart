@@ -14,10 +14,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class MapBody extends StatefulWidget {
   final List<dynamic>? courseStageMap;
+  final VoidCallback onButtonPressed;
+  final TimeOfDay startedTime;
 
   const MapBody({
     Key? key,
     required this.courseStageMap,
+    required this.onButtonPressed,
+    required this.startedTime,
   }) : super(key: key);
 
   @override
@@ -179,73 +183,74 @@ class _MapWidgetState extends State<MapBody> {
             super.dispose();
           }
 
-          Future<TimeOfDay> getSelectedTime() async {
-            final prefs = await SharedPreferences.getInstance();
-
-            String timeString = prefs.getString('selected_time') ?? "00:00";
-            List<String> parts = timeString.split(':');
-            return TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
-          }
-
-          void loadSelectedTime() async {
-            TimeOfDay time = await getSelectedTime();
-            setState(() {
-              startedTime = time;
-            });
-          }
-
-          return FutureBuilder<TimeOfDay>(
-            future: getSelectedTime(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                startedTime = snapshot.data!;
-                return WillPopScope(
-                  onWillPop: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    print(prefs.getString('selected_time'));
-
-                    prefs.remove('selected_time');
-                    return true;
-                  },
-                  child: Scaffold(
-                    appBar: AppBar(),
-                    body: Column(
-                      children: [
-                        ListTileOfCourse(startedTime: startedTime),
-                        ElevatedButton(onPressed: () {}, child: const Text('Sledz przejazd')),
-                        SizedBox(
-                          height: MediaQuery.sizeOf(context).height -
-                              AppBar().preferredSize.height -
-                              MediaQuery.sizeOf(context).height * 0.16,
-                          child: Stack(
-                            children: [
-                              GoogleMap(
-                                  onMapCreated: (GoogleMapController controller) {
-                                    mapController = controller;
-                                    getPolylineCoordinates();
-                                    startMarkerMovement();
-                                  },
-                                  initialCameraPosition: kGooglePlex,
-                                  mapType: MapType.terrain,
-                                  polylines: {
-                                    Polyline(
-                                      polylineId: const PolylineId('route'),
-                                      points: polylineCoordinates,
-                                      color: Colors.blue,
-                                      width: 3,
-                                    )
-                                  },
-                                  markers: _markers),
-                            ],
-                          ),
-                        )
-                      ],
+          void showCustomBottomSheet() {
+            showBottomSheet(
+              context: context,
+              builder: (BuildContext context) {
+                return Container(
+                  height: 64,
+                  color: Colors.black12,
+                  child: const Center(
+                    child: Text(
+                      "Złe dane!!!",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 );
+              },
+            );
+
+            // Close the bottom sheet after 2 seconds
+            Timer(const Duration(seconds: 2), () {
+              if (Navigator.of(context).canPop()) {
+                Navigator.of(context).pop();
               }
-              return Container();
-            },
+            });
+          }
+
+          return Scaffold(
+            appBar: AppBar(),
+            body: Column(
+              children: [
+                ListTileOfCourse(startedTime: widget.startedTime),
+                ElevatedButton(
+                  onPressed: () {
+                    widget.onButtonPressed();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Sledz przejazd'),
+                ),
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).height -
+                      AppBar().preferredSize.height -
+                      MediaQuery.sizeOf(context).height * 0.16,
+                  child: Stack(
+                    children: [
+                      GoogleMap(
+                          onMapCreated: (GoogleMapController controller) {
+                            mapController = controller;
+                            getPolylineCoordinates();
+                            startMarkerMovement();
+                          },
+                          initialCameraPosition: kGooglePlex,
+                          mapType: MapType.terrain,
+                          polylines: {
+                            Polyline(
+                              polylineId: const PolylineId('route'),
+                              points: polylineCoordinates,
+                              color: Colors.blue,
+                              width: 3,
+                            )
+                          },
+                          markers: _markers),
+                    ],
+                  ),
+                )
+              ],
+            ),
           );
         }
 
