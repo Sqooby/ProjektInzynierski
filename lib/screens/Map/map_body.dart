@@ -49,6 +49,12 @@ class _MapWidgetState extends State<MapBody> {
   );
 
   @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<BusStopCubit, BusStopState>(
       builder: (context, state) {
@@ -176,13 +182,6 @@ class _MapWidgetState extends State<MapBody> {
             });
           }
 
-          @override
-          @override
-          void dispose() {
-            timer?.cancel();
-            super.dispose();
-          }
-
           void showCustomBottomSheet() {
             showBottomSheet(
               context: context,
@@ -218,6 +217,7 @@ class _MapWidgetState extends State<MapBody> {
                 ListTileOfCourse(startedTime: widget.startedTime),
                 ElevatedButton(
                   onPressed: () {
+                    timer?.cancel();
                     widget.onButtonPressed();
                     Navigator.pop(context);
                   },

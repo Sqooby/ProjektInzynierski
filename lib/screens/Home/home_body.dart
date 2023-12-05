@@ -154,21 +154,39 @@ class _HomeWidgetState extends State<HomeWidget> {
               widget.predictionsDestinationList.isNotEmpty ? destinationLocationListView() : const SizedBox(),
               const SizedBox(height: 100),
               widget.activeRoutes.isNotEmpty
-                  ? Container(
-                      height: 60,
+                  ? Expanded(
                       child: ListView.builder(
                         itemCount: widget.activeRoutes.length,
                         itemBuilder: (context, index) {
-                          print(widget.activeRoutes[index]['origin']);
-                          return ListView(
-                            children: [Text(widget.activeRoutes[index].values.firstOrNull)],
+                          final route = widget.activeRoutes[index];
+                          final key = '${route['origin']}-${route['destination']}-${route['time']}';
+                          return Dismissible(
+                            key: Key(key),
+                            onDismissed: (direction) {
+                              setState(() {
+                                widget.activeRoutes.removeAt(index);
+                              });
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text('${route['origin']} dismissed')));
+                            },
+                            background: Container(color: Colors.red),
+                            child: SizedBox(
+                              height: 80,
+                              child: ListTile(
+                                leading: Text(route['origin']),
+                                title: Text(route['destination']),
+                                trailing: Text(route['time']),
+                              ),
+                            ),
                           );
                         },
-                      ))
+                      ),
+                    )
                   : const SizedBox()
             ],
           );
         }
+        print(widget.activeRoutes.isNotEmpty);
         return Container();
       },
     );
