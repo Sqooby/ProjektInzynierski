@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pv_analizer/DataManager/data_manager.dart';
 import 'package:pv_analizer/models/busStop.dart';
 import 'package:pv_analizer/models/course_stage_list.dart';
@@ -49,144 +51,148 @@ class _HomeWidgetState extends State<HomeWidget> {
         } else if (state is BusStopErrorState) {
         } else if (state is BusStopLoadedState) {
           widget.busStopList = state.busStop;
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: widget.originController,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: const InputDecoration(hintText: 'Origin'),
-                          onChanged: (value) async {
-                            final result = await ls.getAutocompleteLocation(value);
+          return Scaffold(
+            resizeToAvoidBottomInset: true,
+            body: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: widget.originController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(hintText: 'Origin'),
+                            onChanged: (value) async {
+                              final result = await ls.getAutocompleteLocation(value);
 
-                            setState(() {
-                              widget.predictionsOriginList = result;
-                            });
-                          },
-                        ),
-                        TextFormField(
-                          controller: widget.destinationController,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: const InputDecoration(hintText: 'Destination'),
-                          onChanged: (value) async {
-                            var result = await ls.getAutocompleteLocation(value);
+                              setState(() {
+                                widget.predictionsOriginList = result;
+                              });
+                            },
+                          ),
+                          TextFormField(
+                            controller: widget.destinationController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(hintText: 'Destination'),
+                            onChanged: (value) async {
+                              var result = await ls.getAutocompleteLocation(value);
 
-                            setState(() {
-                              widget.predictionsDestinationList = result;
-                            });
-                          },
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            Text('${widget.selectedTime.hour}:${widget.selectedTime.minute}'),
-                            ElevatedButton(
-                              child: const Text('Choose Time'),
-                              onPressed: () async {
-                                final TimeOfDay? timeOfDay = await showTimePicker(
-                                    context: context,
-                                    initialTime: widget.selectedTime,
-                                    initialEntryMode: TimePickerEntryMode.dial);
-                                if (timeOfDay != null) {
-                                  setState(() {
-                                    widget.selectedTime = timeOfDay;
-                                  });
-                                }
+                              setState(() {
+                                widget.predictionsDestinationList = result;
+                              });
+                            },
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text('${widget.selectedTime.hour}:${widget.selectedTime.minute}'),
+                              ElevatedButton(
+                                child: const Text('Choose Time'),
+                                onPressed: () async {
+                                  final TimeOfDay? timeOfDay = await showTimePicker(
+                                      context: context,
+                                      initialTime: widget.selectedTime,
+                                      initialEntryMode: TimePickerEntryMode.dial);
+                                  if (timeOfDay != null) {
+                                    setState(() {
+                                      widget.selectedTime = timeOfDay;
+                                    });
+                                  }
+                                },
+                              )
+                            ],
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              final origin = widget.originController.text;
+                              final destination = widget.destinationController.text;
+                              final coordinates = await ls.getDirections(origin, destination);
+
+                              final startLocation = coordinates['start_location'];
+                              final endLocation = coordinates['end_location'];
+                              print(PolylinePoints().decodePolyline(coordinates['polyline'] as String));
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MapBody(
+                                    startedTime: widget.selectedTime,
+                                    startLocation: LatLng(startLocation['lat'], startLocation['lng']),
+                                    endLocation: LatLng(endLocation['lat'], endLocation['lng']),
+                                    polylinePoints: PolylinePoints().decodePolyline(coordinates['polyline'] as String),
+                                    onButtonPressed: () {
+                                      var newRoute = {
+                                        'origin': widget.originController.text,
+                                        'destination': widget.destinationController.text,
+                                        'time': widget.selectedTime.format(context) // format TimeOfDay to String
+                                      };
+                                      bool existingRoute = widget.activeRoutes.any((route) =>
+                                          route['origin'] == newRoute['origin'] &&
+                                          route['destination'] == newRoute['destination'] &&
+                                          route['time'] == newRoute['time']);
+
+                                      if (!existingRoute) {
+                                        setState(() {
+                                          widget.activeRoutes.add(newRoute);
+                                        });
+                                        print(widget.activeRoutes);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.search,
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 30,
+                ),
+                widget.predictionsOriginList.isNotEmpty ? originLocationListView() : const SizedBox(),
+                widget.predictionsDestinationList.isNotEmpty ? destinationLocationListView() : const SizedBox(),
+                widget.activeRoutes.isNotEmpty
+                    ? Expanded(
+                        child: ListView.builder(
+                          itemCount: widget.activeRoutes.length,
+                          itemBuilder: (context, index) {
+                            final route = widget.activeRoutes[index];
+                            final key = '${route['origin']}-${route['destination']}-${route['time']}';
+                            return Dismissible(
+                              key: Key(key),
+                              onDismissed: (direction) {
+                                setState(() {
+                                  widget.activeRoutes.removeAt(index);
+                                });
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(content: Text('${route['origin']} dismissed')));
                               },
-                            )
-                          ],
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            widget.orgDesBusStop = await gettingNearestBusStop(
-                                widget.originLat, widget.originLng, widget.destinationLat, widget.destinationLng);
-                            final courseMap = await gettingMapBusStopNameAndStage();
-
-                            var keys = courseMap.keys.toList();
-                            var val = courseMap[keys[0]];
-                            ls.getDirections(widget.originController.text, widget.destinationController.text);
-
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MapBody(
-                                  startedTime: widget.selectedTime,
-                                  courseStageMap: val,
-                                  onButtonPressed: () {
-                                    var newRoute = {
-                                      'origin': widget.originController.text,
-                                      'destination': widget.destinationController.text,
-                                      'time': widget.selectedTime.format(context) // format TimeOfDay to String
-                                    };
-                                    bool existingRoute = widget.activeRoutes.any((route) =>
-                                        route['origin'] == newRoute['origin'] &&
-                                        route['destination'] == newRoute['destination'] &&
-                                        route['time'] == newRoute['time']);
-
-                                    if (!existingRoute) {
-                                      setState(() {
-                                        widget.activeRoutes.add(newRoute);
-                                      });
-                                      print(widget.activeRoutes);
-                                    }
-                                  },
+                              background: Container(color: Colors.red),
+                              child: SizedBox(
+                                height: 80,
+                                child: ListTile(
+                                  leading: Text(route['origin']),
+                                  title: Text(route['destination']),
+                                  trailing: Text(route['time']),
                                 ),
                               ),
                             );
                           },
-                          icon: const Icon(
-                            Icons.search,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              widget.predictionsOriginList.isNotEmpty ? originLocationListView() : const SizedBox(),
-              widget.predictionsDestinationList.isNotEmpty ? destinationLocationListView() : const SizedBox(),
-              const SizedBox(height: 100),
-              widget.activeRoutes.isNotEmpty
-                  ? Expanded(
-                      child: ListView.builder(
-                        itemCount: widget.activeRoutes.length,
-                        itemBuilder: (context, index) {
-                          final route = widget.activeRoutes[index];
-                          final key = '${route['origin']}-${route['destination']}-${route['time']}';
-                          return Dismissible(
-                            key: Key(key),
-                            onDismissed: (direction) {
-                              setState(() {
-                                widget.activeRoutes.removeAt(index);
-                              });
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(content: Text('${route['origin']} dismissed')));
-                            },
-                            background: Container(color: Colors.red),
-                            child: SizedBox(
-                              height: 80,
-                              child: ListTile(
-                                leading: Text(route['origin']),
-                                title: Text(route['destination']),
-                                trailing: Text(route['time']),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  : const SizedBox()
-            ],
+                        ),
+                      )
+                    : const SizedBox()
+              ],
+            ),
           );
         }
-        print(widget.activeRoutes.isNotEmpty);
+
         return Container();
       },
     );

@@ -6,22 +6,27 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pv_analizer/repositories/location_service_repo.dart';
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/models/busStop.dart';
 
 import 'package:pv_analizer/widgets/List_tile_of_course.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class MapBody extends StatefulWidget {
-  final List<dynamic>? courseStageMap;
+  final LatLng startLocation;
+  final LatLng endLocation;
+  final List<PointLatLng> polylinePoints;
+
   final VoidCallback onButtonPressed;
   final TimeOfDay startedTime;
 
   const MapBody({
     Key? key,
-    required this.courseStageMap,
     required this.onButtonPressed,
     required this.startedTime,
+    required this.startLocation,
+    required this.endLocation,
+    required this.polylinePoints,
   }) : super(key: key);
 
   @override
@@ -36,10 +41,12 @@ class _MapWidgetState extends State<MapBody> {
   Timer? timer;
   int currentIndex = 0;
   TimeOfDay? startedTime;
+  Set<Polyline> _polylines = Set<Polyline>();
+  LocationService ls = LocationService();
 
   final Set<Marker> _markers = {};
 
-  GoogleMapController? mapController;
+  late GoogleMapController mapController;
 
   final List<LatLng> polygonLatLngs = <LatLng>[];
 
@@ -52,6 +59,45 @@ class _MapWidgetState extends State<MapBody> {
   void dispose() {
     timer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _setRoute() {
+    final startMarker = Marker(
+      markerId: const MarkerId('start'),
+      position: widget.startLocation,
+      infoWindow: const InfoWindow(title: 'Start Location'),
+    );
+
+    final endMarker = Marker(
+      markerId: const MarkerId('end'),
+      position: widget.endLocation,
+      infoWindow: const InfoWindow(title: 'Destination Location'),
+    );
+
+    List<LatLng> polylineCoordinates =
+        widget.polylinePoints.map((point) => LatLng(point.latitude, point.longitude)).toList();
+    final routePolyline = Polyline(
+      polylineId: const PolylineId('route'),
+      points: polylineCoordinates,
+      color: Colors.blue,
+      width: 3,
+    );
+
+    setState(() {
+      // Dodaj markery do mapy
+      _markers.add(startMarker);
+      _markers.add(endMarker);
+
+      // Dodaj polilinię reprezentującą trasę
+      _polylines.add(routePolyline);
+
+      // Opcjonalnie: Jeśli chcesz, aby mapa automatycznie powiększyła się, aby pokazać całą trasę:
+    });
   }
 
   @override
@@ -75,43 +121,40 @@ class _MapWidgetState extends State<MapBody> {
           }
 
           void getPolylineCoordinates() async {
-            PolylinePoints polylinePoints = PolylinePoints();
+            // PolylinePoints polylinePoints = PolylinePoints();
 
-            PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-              apiKey!,
-              PointLatLng(double.parse(widget.courseStageMap!.first['gps_n']),
-                  double.parse(widget.courseStageMap!.first['gps_e'])),
-              PointLatLng(
-                double.parse(widget.courseStageMap!.last['gps_n']),
-                double.parse(widget.courseStageMap!.last['gps_e']),
-              ),
-            );
+            // PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+            //   apiKey!,
+            //   widget.polylinePoints[0],
+            //   widget.
+            //   ),
+            // );
 
             const double radius = 0.05; // radius in kilometers
-            for (var busStop in busStops) {
-              for (var point in result.points) {
-                LatLng position = LatLng(point.latitude, point.longitude);
+            // for (var busStop in busStops) {
+            //   for (var point in result.points) {
+            //     LatLng position = LatLng(point.latitude, point.longitude);
 
-                double distance = calculateDistance(
-                    double.parse(busStop.gpsN), double.parse(busStop.gpsE), point.latitude, point.longitude);
+            //     double distance = calculateDistance(
+            //         double.parse(busStop.gpsN), double.parse(busStop.gpsE), point.latitude, point.longitude);
 
-                if (distance <= radius) {
-                  _markers.add(
-                    Marker(
-                      markerId: MarkerId(busStop.name),
-                      position: LatLng(double.parse(busStop.gpsN), double.parse(busStop.gpsE)),
-                      infoWindow: InfoWindow(title: busStop.name),
-                    ),
-                  );
-                  break; // Stop checking other points if one is within the radius
-                }
-                if (!polylineCoordinates.contains(position)) {
-                  polylineCoordinates.add(position);
-                }
-              }
+            //     if (distance <= radius) {
+            //       _markers.add(
+            //         Marker(
+            //           markerId: MarkerId(busStop.name),
+            //           position: LatLng(double.parse(busStop.gpsN), double.parse(busStop.gpsE)),
+            //           infoWindow: InfoWindow(title: busStop.name),
+            //         ),
+            //       );
+            //       break; // Stop checking other points if one is within the radius
+            //     }
+            //     if (!polylineCoordinates.contains(position)) {
+            //       polylineCoordinates.add(position);
+            //     }
+            //   }
 
-              setState(() {});
-            }
+            //   setState(() {});
+            // }
           }
 
           List<LatLng> interpolatePoints(LatLng start, LatLng end) {
@@ -231,20 +274,19 @@ class _MapWidgetState extends State<MapBody> {
                     children: [
                       GoogleMap(
                           onMapCreated: (GoogleMapController controller) {
-                            mapController = controller;
-                            getPolylineCoordinates();
-                            startMarkerMovement();
+                            _setRoute();
                           },
                           initialCameraPosition: kGooglePlex,
                           mapType: MapType.terrain,
-                          polylines: {
-                            Polyline(
-                              polylineId: const PolylineId('route'),
-                              points: polylineCoordinates,
-                              color: Colors.blue,
-                              width: 3,
-                            )
-                          },
+                          polylines: _polylines,
+                          // polylines: {
+                          //   Polyline(
+                          //     polylineId: const PolylineId('route'),
+                          //     points: polylineCoordinates,
+                          //     color: Colors.blue,
+                          //     width: 3,
+                          //   )
+                          // },
                           markers: _markers),
                     ],
                   ),
