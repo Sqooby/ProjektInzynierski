@@ -279,14 +279,6 @@ class _MapWidgetState extends State<MapBody> {
                           initialCameraPosition: kGooglePlex,
                           mapType: MapType.terrain,
                           polylines: _polylines,
-                          // polylines: {
-                          //   Polyline(
-                          //     polylineId: const PolylineId('route'),
-                          //     points: polylineCoordinates,
-                          //     color: Colors.blue,
-                          //     width: 3,
-                          //   )
-                          // },
                           markers: _markers),
                     ],
                   ),
