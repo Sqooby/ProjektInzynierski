@@ -44,7 +44,6 @@ class LocationService {
       'polyline': json['routes'][0]['overview_polyline']['points'],
       'polyline_decoded': PolylinePoints().decodePolyline(json['routes'][0]['overview_polyline']['points']),
     };
-    print(url);
 
     return result;
   }
@@ -55,6 +54,7 @@ class LocationService {
 
     final String url =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$key&radius=$radius&location=$location';
+    print(url);
 
     var response = await http.get(Uri.parse(url));
 

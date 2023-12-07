@@ -6,13 +6,11 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pv_analizer/DataManager/data_manager.dart';
 import 'package:pv_analizer/models/busStop.dart';
-import 'package:pv_analizer/models/course_stage_list.dart';
+
 import 'package:pv_analizer/repositories/location_service_repo.dart';
-import 'package:geolocator/geolocator.dart';
 
 import 'package:pv_analizer/screens/BusStop/cubit/bus_stop_cubit.dart';
 import 'package:pv_analizer/screens/Map/map_body.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
 class HomeWidget extends StatefulWidget {
@@ -169,16 +167,39 @@ class _HomeWidgetState extends State<HomeWidget> {
                                 setState(() {
                                   widget.activeRoutes.removeAt(index);
                                 });
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(SnackBar(content: Text('${route['origin']} dismissed')));
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content: Text(
+                                        '${route['origin']} to ${route['destination']} at ${route['time']}   dismissed')));
                               },
                               background: Container(color: Colors.red),
-                              child: SizedBox(
-                                height: 80,
-                                child: ListTile(
-                                  leading: Text(route['origin']),
-                                  title: Text(route['destination']),
-                                  trailing: Text(route['time']),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  final origin = widget.originController.text;
+                                  final destination = widget.destinationController.text;
+                                  final coordinates = await ls.getDirections(origin, destination);
+
+                                  final startLocation = coordinates['start_location'];
+                                  final endLocation = coordinates['end_location'];
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MapBody(
+                                          startedTime: widget.selectedTime,
+                                          startLocation: LatLng(startLocation['lat'], startLocation['lng']),
+                                          endLocation: LatLng(endLocation['lat'], endLocation['lng']),
+                                          polylinePoints:
+                                              PolylinePoints().decodePolyline(coordinates['polyline'] as String),
+                                          onButtonPressed: () {}),
+                                    ),
+                                  );
+                                },
+                                child: SizedBox(
+                                  height: 80,
+                                  child: ListTile(
+                                    leading: Text(route['origin']),
+                                    title: Text(route['destination']),
+                                    trailing: Text(route['time']),
+                                  ),
                                 ),
                               ),
                             );

@@ -17,7 +17,7 @@ class DataManager {
     final busStopByCourse = courseStage.where((course) => course.id_course == idCourseStage).map((course) {
       final idBusStop = course.id_bus_stop;
       final busStopName = busStop.where((busStop) => busStop.idBusStop == idBusStop);
-      print(busStopName);
+
       return busStopName;
     }).toList();
 
