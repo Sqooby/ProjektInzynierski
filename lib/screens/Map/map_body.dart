@@ -44,7 +44,8 @@ class _MapWidgetState extends State<MapBody> {
   Set<Polyline> _polylines = Set<Polyline>();
   LocationService ls = LocationService();
 
-  final Set<Marker> _markers = {};
+  Set<Marker> _markers = {};
+  final List<Marker> markersCoordinates = [];
 
   late GoogleMapController mapController;
 
@@ -66,40 +67,6 @@ class _MapWidgetState extends State<MapBody> {
     super.initState();
   }
 
-  void _setRoute() {
-    final startMarker = Marker(
-      markerId: const MarkerId('start'),
-      position: widget.startLocation,
-      infoWindow: const InfoWindow(title: 'Start Location'),
-    );
-
-    final endMarker = Marker(
-      markerId: const MarkerId('end'),
-      position: widget.endLocation,
-      infoWindow: const InfoWindow(title: 'Destination Location'),
-    );
-
-    List<LatLng> polylineCoordinates =
-        widget.polylinePoints.map((point) => LatLng(point.latitude, point.longitude)).toList();
-    final routePolyline = Polyline(
-      polylineId: const PolylineId('route'),
-      points: polylineCoordinates,
-      color: Colors.blue,
-      width: 3,
-    );
-
-    setState(() {
-      // Dodaj markery do mapy
-      _markers.add(startMarker);
-      _markers.add(endMarker);
-
-      // Dodaj polilinię reprezentującą trasę
-      _polylines.add(routePolyline);
-
-      // Opcjonalnie: Jeśli chcesz, aby mapa automatycznie powiększyła się, aby pokazać całą trasę:
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<BusStopCubit, BusStopState>(
@@ -111,145 +78,62 @@ class _MapWidgetState extends State<MapBody> {
         } else if (state is BusStopErrorState) {
         } else if (state is BusStopLoadedState) {
           busStops = state.busStop;
-
-          @override
-          double calculateDistance(lat1, lon1, lat2, lon2) {
+          double calculateDistance(LatLng start, LatLng end) {
             var p = 0.017453292519943295;
-            var c = cos;
-            var a = 0.5 - c((lat2 - lat1) * p) / 2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+            var a = 0.5 -
+                cos((end.latitude - start.latitude) * p) / 2 +
+                cos(start.latitude * p) * cos(end.latitude * p) * (1 - cos((end.longitude - start.longitude) * p)) / 2;
             return 12742 * asin(sqrt(a));
           }
 
-          void getPolylineCoordinates() async {
-            // PolylinePoints polylinePoints = PolylinePoints();
-
-            // PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-            //   apiKey!,
-            //   widget.polylinePoints[0],
-            //   widget.
-            //   ),
-            // );
-
-            const double radius = 0.05; // radius in kilometers
-            // for (var busStop in busStops) {
-            //   for (var point in result.points) {
-            //     LatLng position = LatLng(point.latitude, point.longitude);
-
-            //     double distance = calculateDistance(
-            //         double.parse(busStop.gpsN), double.parse(busStop.gpsE), point.latitude, point.longitude);
-
-            //     if (distance <= radius) {
-            //       _markers.add(
-            //         Marker(
-            //           markerId: MarkerId(busStop.name),
-            //           position: LatLng(double.parse(busStop.gpsN), double.parse(busStop.gpsE)),
-            //           infoWindow: InfoWindow(title: busStop.name),
-            //         ),
-            //       );
-            //       break; // Stop checking other points if one is within the radius
-            //     }
-            //     if (!polylineCoordinates.contains(position)) {
-            //       polylineCoordinates.add(position);
-            //     }
-            //   }
-
-            //   setState(() {});
-            // }
-          }
-
-          List<LatLng> interpolatePoints(LatLng start, LatLng end) {
-            // Determine the number of steps based on the duration and speed
-
-            List<LatLng> points = [];
-            int steps = 5;
-
-            for (int i = 0; i <= steps; i++) {
-              double lat = start.latitude + (end.latitude - start.latitude) * (i / steps);
-              double lng = start.longitude + (end.longitude - start.longitude) * (i / steps);
-              points.add(LatLng(lat, lng));
-            }
-
-            return points;
-          }
-
-          void updateMarkerPosition(LatLng newPosition) {
-            Marker movingMarker = Marker(
-                markerId: const MarkerId('moving_dot'),
-                position: newPosition, // New position
-                icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-                infoWindow: const InfoWindow(
-                  title: 'Bus 123',
-                  snippet: 'Next stop: Central Station',
-                ),
-                zIndex: 2
-
-                // You can customize the marker to be a red dot or any other icon
-                );
-
-            setState(() {
-              // Update the position of the moving marker
-              _markers.removeWhere((marker) => marker.markerId.value == 'moving_dot');
-              _markers.add(movingMarker);
-            });
-            mapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-              target: newPosition, // The LatLng of the new position
-              zoom: 14, // Adjust the zoom level as needed
-            )));
-          }
-
-          void animateMarker(List<LatLng> points, int index) {
-            if (index < points.length) {
-              updateMarkerPosition(points[index]);
-              Future.delayed(const Duration(seconds: 1), () {
-                animateMarker(points, index + 1);
-              });
-            } else {
-              // Increment the current index when finished animating between the points
-              currentIndex++;
-            }
-          }
-
-          void startMarkerMovement() {
-            const duration = Duration(seconds: 10); // Update this based on how fast you want the marker to move
-            timer = Timer.periodic(duration, (Timer t) {
-              if (currentIndex < polylineCoordinates.length - 1) {
-                int nextIndex = currentIndex + 1;
-                LatLng startPosition = polylineCoordinates[currentIndex];
-                LatLng endPosition = polylineCoordinates[nextIndex];
-
-                List<LatLng> interpolatedPoints = interpolatePoints(startPosition, endPosition);
-                animateMarker(interpolatedPoints, 0);
-              } else {
-                timer?.cancel(); // Stop the timer when we reach the end
-              }
-            });
-          }
-
-          void showCustomBottomSheet() {
-            showBottomSheet(
-              context: context,
-              builder: (BuildContext context) {
-                return Container(
-                  height: 64,
-                  color: Colors.black12,
-                  child: const Center(
-                    child: Text(
-                      "Złe dane!!!",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              },
+          void onMapCreated(GoogleMapController controller) {
+            mapController = controller;
+            final startMarker = Marker(
+              markerId: const MarkerId('start'),
+              position: widget.startLocation,
+              infoWindow: const InfoWindow(title: 'Start Location'),
             );
 
-            // Close the bottom sheet after 2 seconds
-            Timer(const Duration(seconds: 2), () {
-              if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
+            final endMarker = Marker(
+              markerId: const MarkerId('end'),
+              position: widget.endLocation,
+              infoWindow: const InfoWindow(title: 'Destination Location'),
+            );
+
+            polylineCoordinates =
+                widget.polylinePoints.map((point) => LatLng(point.latitude, point.longitude)).toList();
+            final routePolyline = Polyline(
+              polylineId: const PolylineId('route'),
+              points: polylineCoordinates,
+              color: Colors.blue,
+              width: 5,
+            );
+            for (var busStop in busStops) {
+              for (int i = 0; i < polylineCoordinates.length - 1; i++) {
+                double distance = calculateDistance(
+                    LatLng(double.parse(busStop.gpsN), double.parse(busStop.gpsE)), polylineCoordinates[i]);
+
+                if (distance <= 0.05) {
+                  // Dodaj marker przystanku
+                  markersCoordinates.add(Marker(
+                    markerId: MarkerId('busStop_${busStop.idBusStop}'),
+                    position: LatLng(double.parse(busStop.gpsN), double.parse(busStop.gpsE)),
+                    infoWindow: InfoWindow(title: busStop.name),
+                  ));
+
+                  break; // Przerwij pętlę, jeśli znaleziono przystanek w pobliżu
+                }
               }
+            }
+
+            _markers = markersCoordinates.toSet();
+            _markers.add(startMarker);
+            _markers.add(endMarker);
+
+            _polylines.add(routePolyline);
+
+            setState(() {
+              // Dodaj markery do mapy
             });
           }
 
@@ -260,9 +144,8 @@ class _MapWidgetState extends State<MapBody> {
                 ListTileOfCourse(startedTime: widget.startedTime),
                 ElevatedButton(
                   onPressed: () {
-                    timer?.cancel();
-                    widget.onButtonPressed();
-                    Navigator.pop(context);
+                    // widget.onButtonPressed();
+                    // Navigator.pop(context);
                   },
                   child: const Text('Sledz przejazd'),
                 ),
@@ -273,9 +156,7 @@ class _MapWidgetState extends State<MapBody> {
                   child: Stack(
                     children: [
                       GoogleMap(
-                          onMapCreated: (GoogleMapController controller) {
-                            _setRoute();
-                          },
+                          onMapCreated: onMapCreated,
                           initialCameraPosition: kGooglePlex,
                           mapType: MapType.terrain,
                           polylines: _polylines,

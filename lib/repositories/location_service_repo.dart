@@ -55,7 +55,6 @@ class LocationService {
 
     final String url =
         'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$key&radius=$radius&location=$location';
-    print(url);
 
     var response = await http.get(Uri.parse(url));
 

@@ -112,7 +112,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
                               final startLocation = coordinates['start_location'];
                               final endLocation = coordinates['end_location'];
-                              print(PolylinePoints().decodePolyline(coordinates['polyline'] as String));
 
                               Navigator.push(
                                 context,
@@ -137,7 +136,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                                         setState(() {
                                           widget.activeRoutes.add(newRoute);
                                         });
-                                        print(widget.activeRoutes);
                                       }
                                     },
                                   ),
