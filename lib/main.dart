@@ -31,9 +31,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<GoogleMapCubit>(
-          create: (context) => GoogleMapCubit(LocationService()),
-        ),
+        BlocProvider<GoogleMapCubit>(create: (context) => GoogleMapCubit(LocationService())),
         BlocProvider<BusStopCubit>(create: (context) => BusStopCubit(BusStopRepo())),
         BlocProvider<UserCubit>(create: (context) => UserCubit(UserRepo())),
       ],

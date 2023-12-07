@@ -50,7 +50,12 @@ class LocationService {
   }
 
   Future<List<String>> getAutocompleteLocation(String input) async {
-    final String url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$key';
+    String location = '50.041187,21.999121'; // Lokalizacja dla Rzeszowa
+    String radius = '300'; // Promień wyszukiwania w metrach
+
+    final String url =
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$input&key=$key&radius=$radius&location=$location';
+    print(url);
 
     var response = await http.get(Uri.parse(url));
 
