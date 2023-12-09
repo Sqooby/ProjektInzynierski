@@ -21,8 +21,12 @@ class _ListTileOfCourseState extends State<ListTileOfCourse> {
       height: MediaQuery.sizeOf(context).height * 0.05,
       child: ListTile(
         style: ListTileStyle.drawer,
-        leading: const Text('odjazd o godz:'),
-        title: Text('${widget.startedTime!.hour}:${widget.startedTime!.minute}'),
+        title: Center(
+          child: Text(
+            'odjazd o godz:  ${widget.startedTime!.hour}:${widget.startedTime!.minute}',
+            style: const TextStyle(fontSize: 24),
+          ),
+        ),
       ),
     );
   }
