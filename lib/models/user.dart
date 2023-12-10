@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 class User {
-  int idUser;
+  int? idUser;
   String role;
   String firstName;
   String lastName;
@@ -17,7 +17,7 @@ class User {
   bool isActive;
   String dateJoined;
   User({
-    required this.idUser,
+    this.idUser,
     required this.role,
     required this.firstName,
     required this.lastName,

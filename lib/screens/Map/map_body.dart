@@ -98,8 +98,9 @@ class _MapWidgetState extends State<MapBody> {
                 ListTileOfCourse(startedTime: widget.startedTime),
                 ElevatedButton(
                   onPressed: () {
-                    widget.onButtonPressed();
-                    Navigator.pop(context);
+                    animateCamera();
+                    // widget.onButtonPressed();
+                    // Navigator.pop(context);
                   },
                   child: const Text('Book a ride'),
                 ),

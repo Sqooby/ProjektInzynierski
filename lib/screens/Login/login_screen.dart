@@ -34,9 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  addIdToSf(int id) async {
+  addIdToSf(int? id) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('id', id);
+    await prefs.setInt('id', id!);
   }
 
   @override
